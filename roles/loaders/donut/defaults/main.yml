@@ -1,0 +1,6 @@
+---
+DonutPackages:
+  - mingw-w64
+  - gcc
+  - make
+DonutPath: "/home/{{ ansible_user_id }}/tools/loaders/Donut"

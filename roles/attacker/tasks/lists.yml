@@ -1,0 +1,28 @@
+---
+############## SecLists
+- name: Checking for SecLists
+  stat: 
+    path: "{{ Lists }}/SecLists"
+  register: seclists_path
+
+# Cloning if path doesn't exist
+- name: Cloning SecLists
+  ansible.builtin.git:
+    repo: https://github.com/danielmiessler/SecLists
+    dest: "{{ Lists }}/SecLists"
+    single_branch: yes
+    version: master
+  when: seclists_path.stat.exists == false
+
+############## RockYou
+- name: Checking for RockYou
+  stat: 
+    path: "{{ Lists }}/rockyou.txt"
+  register: rockyou_path
+
+- name: Download Rockyou
+  ansible.builtin.unarchive:
+    src: https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt
+    dest: "{{ Lists }}/rockyou.txt"
+    remote_src: yes
+  when: rockyou_path.stat.exists == false

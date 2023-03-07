@@ -1,0 +1,4 @@
+IvyPath: "/home/{{ ansible_user_id }}/tools/loaders/Ivy"
+IvyDeps:
+  - "fatih/color"
+  - "KyleBanks/XOREncryption/Go"

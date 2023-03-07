@@ -1,0 +1,27 @@
+---
+- name: Install ActiveDirectory PowerShell tools
+  ansible.windows.win_feature:
+    name: RSAT-AD-Powershell
+    state: present
+    include_sub_features: yes
+    include_management_tools: yes
+  register: win_feature
+
+
+- name: Install Active Directory Certification Authority
+  ansible.windows.win_feature:
+       name: ADCS-Cert-Authority
+       include_management_tools: yes
+       include_sub_features: yes
+       state: present
+
+- name: Powershell - Configure Active Directory Certificate Authority
+  ansible.windows.win_powershell:
+    script: |      
+          $password = ConvertTo-SecureString "Passw0rd!" -AsPlainText -Force
+          $creds = New-Object System.Management.Automation.PSCredential ("{{ Domain }}\administrator", $password)
+          $sess = New-PSSession -ComputerName {{ inventory_hostname }} -credential $creds
+          Install-AdcsCertificationAuthority -CAType EnterpriseRootCa -CryptoProviderName "RSA#Microsoft Software Key Storage Provider" -KeyLength 2048 -HashAlgorithmName SHA256 -ValidityPeriod Years -ValidityPeriodUnits 99 -Force:$true -Credential $creds
+  
+    
+      

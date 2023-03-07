@@ -1,0 +1,9 @@
+---
+# Installing packages
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  become: true
+  become_user: root
+  loop: "{{ NginxPackages }}"

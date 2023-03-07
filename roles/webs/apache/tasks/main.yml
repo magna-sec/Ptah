@@ -1,0 +1,42 @@
+---
+# Installing packages
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  become: true
+  become_user: root
+  loop: "{{ ApachePackages }}"
+
+ # Install apache mods
+- name: Installing apache mods
+  ansible.builtin.shell:
+      cmd: a2enmod {{ item }}
+  become: true
+  become_user: root
+  loop: "{{ ApacheMods }}"
+
+- name: Restart service apache2, in all cases
+  ansible.builtin.service:
+    name: apache2
+    state: restarted
+  become: true
+  become_user: root
+
+  # Get redirector to profile
+  # Check for existance of cs2modrewrite
+- name: Checking for cs2modrewrite
+  stat: 
+    path: "{{ cs2modrewritePath }}"
+  register: cs2modrewrite_path
+
+# Cloning -> Installing if path doesn't exist
+- name: Cloning cs2modrewrite
+  ansible.builtin.git:
+    repo: https://github.com/threatexpress/cs2modrewrite
+    dest: "{{ cs2modrewritePath }}"
+    single_branch: yes
+    version: master
+  when: cs2modrewrite_path.stat.exists == false
+
+  

@@ -1,0 +1,38 @@
+---
+# Installing packages
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  become: true
+  become_user: root
+  loop: "{{ SliverPackages }}"
+  
+# Installing Golang
+- name: Installing golang
+  community.general.snap:
+    name: go
+    classic: true
+  become: true
+  become_user: root
+    
+# Check for existance of Sliver
+- name: Checking for Sliver
+  stat: 
+    path: "{{ SliverPath }}"
+  register: sliver_path
+
+# Cloning -> Installing if path doesn't exist
+- name: Cloning Sliver
+  ansible.builtin.git:
+    repo: https://github.com/BishopFox/sliver
+    dest: "{{ SliverPath }}"
+    single_branch: yes
+    version: master
+  when: sliver_path.stat.exists == false
+
+- name: Installing Sliver
+  ansible.builtin.shell: make
+  args:
+    chdir: "{{ SliverPath }}"
+  when: sliver_path.stat.exists == false

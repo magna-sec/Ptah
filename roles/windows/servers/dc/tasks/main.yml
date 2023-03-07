@@ -1,0 +1,7 @@
+---
+- include_tasks: domain.yml
+- include_tasks: computers.yml
+- include_tasks: groups.yml
+- include_tasks: users.yml
+- include_tasks: make_misconfigs.yml
+- include_tasks: "{{ Local_Misconfig_Path }}"

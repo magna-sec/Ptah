@@ -1,0 +1,6 @@
+---
+# Set SPN
+- name: Powershell - SetSPN CIFS/workstation01.{{ Domain }} for {{ selection }}
+  ansible.windows.win_powershell:
+    script: |
+      setspn -s {{ selection }}svc/workstation01.{{ Domain }} {{ selection }}

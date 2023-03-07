@@ -1,0 +1,24 @@
+---
+# https://docs.ansible.com/ansible/latest/collections/community/windows/win_domain_user_module.html
+# https://github.com/PhilKeeble/AWS-RedTeam-ADLab/blob/main/dsc/adlab.ps1
+# https://learn.microsoft.com/en-us/windows-server/security/group-managed-service-accounts/configure-kerberos-delegation-group-managed-service-accounts
+
+- name: Pick random computer for constrained delegation
+  set_fact:
+    rand_computer: "{{ Computers | random }}"
+
+# Tested working: Server 2016
+- name: Powershell - Give {{ selection }} msDS-AllowedToDelegateTo -> TIME/{{ rand_computer }}
+  ansible.windows.win_powershell:
+    script: |
+      $user = (Get-ADUser -Identity {{ selection }}).DistinguishedName
+      Set-ADObject -Identity $user -Add @{"msDS-AllowedToDelegateTo" = @("TIME/{{ rand_computer }}","TIME/{{ rand_computer}}.{{ Domain }}","TIME/{{ rand_computer}}.{{ Domain }}/{{ Domain }}")}
+      Set-ADAccountControl -Identity $user -TrustedForDelegation $false -TrustedToAuthForDelegation $true
+
+
+# Set SPNS
+- name: Powershell - SetSPN HOST/workstation01.{{ Domain }} for {{ selection }}
+  ansible.windows.win_powershell:
+    script: |
+      setspn -s {{ selection }}svc/workstation01.{{ Domain }} {{ selection }}
+

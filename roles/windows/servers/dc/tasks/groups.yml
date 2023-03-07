@@ -1,0 +1,17 @@
+---
+# https://docs.ansible.com/ansible/latest/collections/community/windows/win_domain_ou_module.html
+# https://docs.ansible.com/ansible/latest/collections/community/windows/win_domain_group_module.html#ansible-collections-community-windows-win-domain-group-module
+
+- name: Ensure Groups OU is present & protected
+  community.windows.win_domain_ou:
+    name: Groups
+    path: "{{ DN }}"
+    state: present
+    protected: true
+
+- name: Add groups
+  community.windows.win_domain_group:
+    name: "{{ item }}"
+    scope: global
+    path: "{{ Group_OU }}"
+  loop: "{{ Groups }}"

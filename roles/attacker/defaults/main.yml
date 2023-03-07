@@ -1,0 +1,99 @@
+---
+Lists: "/home/{{ ansible_user_id }}/lists"
+Tools: "/home/{{ ansible_user_id }}/tools"
+Info:  "/home/{{ ansible_user_id }}/info"
+Linux: "/home/{{ ansible_user_id }}/tools/linux"
+Windows: "/home/{{ ansible_user_id }}/tools/windows"
+Powershell: "/home/{{ ansible_user_id }}/tools/windows/powershell"
+Exes: "/home/{{ ansible_user_id }}/tools/windows/exes"
+CVE: "/home/{{ ansible_user_id }}/tools/windows/cves"
+Generic: "/home/{{ ansible_user_id }}/tools/windows/generic"
+Pivot: "/home/{{ ansible_user_id }}/tools/pivot"
+Bofs: "/home/{{ ansible_user_id }}/tools/bofs"
+
+InitialPackages:
+ - vim
+ - python3
+ - python3-pip
+ - net-tools
+ - git
+ - tilix
+ - wireshark
+ - wine
+ - mono-complete
+ - curl
+ - nfs-common
+ - openvpn
+ - sqlite3
+ - remmina
+ - mysql-client
+ - sqsh
+ - ltrace
+ - strace
+ - ntpdate
+ - openjdk-11-jdk
+ - socat
+ - wfuzz
+ - hexedit
+ - binwalk
+ - fping
+ - smbclient
+ - proxychains
+ - unzip
+ - nmap
+ - hydra
+ - php-cli
+ - hashcat
+ - libnss3-tools
+ - nikto
+ - sshuttle
+ - ruby-dev
+ - locate
+ - wget 
+ - apt-transport-https
+ - software-properties-common
+ - docker-ce 
+ - docker-ce-cli
+ - containerd.io
+ - docker-compose-plugin
+ - sqlmap
+ - ca-certificates
+ - gnupg
+ - lsb-release
+
+InitialDirs:
+ - "/home/{{ ansible_user_id }}/ctfs"
+ - "/home/{{ ansible_user_id }}/ctfs/thm"
+ - "/home/{{ ansible_user_id }}/ctfs/htb"
+## General
+ - "/home/{{ ansible_user_id }}/tools"
+ - "/home/{{ ansible_user_id }}/lists"
+ - "/home/{{ ansible_user_id }}/info"
+ - "/home/{{ ansible_user_id }}/tools/pivot"
+ - "/home/{{ ansible_user_id }}/tools/bofs"
+## Linux
+ - "/home/{{ ansible_user_id }}/tools/linux"
+## Windows
+ - "/home/{{ ansible_user_id }}/tools/windows"
+ - "/home/{{ ansible_user_id }}/tools/windows/generic"
+ - "/home/{{ ansible_user_id }}/tools/windows/powershell"
+ - "/home/{{ ansible_user_id }}/tools/windows/cves"
+ - "/home/{{ ansible_user_id }}/tools/windows/exes"
+
+PipInstalls:
+ - pyftpdlib
+ - pyasn1
+ - dulwich
+ - updog
+ - uploadserver
+ - grip
+ - dirsearch
+
+SnapInstalls:
+ - crackmapexec
+ - impacket
+ - enum4linux
+ - go
+
+GemInstalls:
+ - wpscan

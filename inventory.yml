@@ -1,0 +1,39 @@
+linux:
+  hosts: null
+  children:
+    attacker:
+      hosts: null
+    teamserver:
+      hosts: null
+    redirector:
+      hosts: null
+windows:
+  hosts: null
+  children:
+    dc:
+      hosts:
+        dc01:
+          ansible_host: 10.10.40.61
+    iis:
+      hosts: null
+    cert:
+      hosts: null
+    fileserver:
+      hosts: null
+    workstation:
+      hosts:
+        workstation01:
+          ansible_host: 10.10.40.64
+        workstation02:
+          ansible_host: 10.10.40.65
+  vars:
+    ansible_user: ansible
+    ansible_password: Passw0rd!
+    ansible_port: 5986
+    ansible_connection: winrm
+    ansible_winrm_transport: basic
+    ansible_winrm_server_cert_validation: ignore
+    windows_gateway: 1.1.1.1
+    windows_mask: 255.255.0.0
+    ansible_become_user: '{{ NetBIOS}}\administrator'
+    ansible_become_password: Passw0rd!

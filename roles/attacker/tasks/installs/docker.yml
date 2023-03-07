@@ -1,0 +1,23 @@
+---
+- name: pull bloodhound image
+  docker_image:
+    name: belane/bloodhound
+    source: pull
+  become: true
+  become_user: root
+
+- name: pull evil-winrm image
+  docker_image:
+    name: oscarakaelvis/evil-winrm
+    source: pull
+  become: true
+  become_user: root
+
+- name: pull john image
+  docker_image:
+    name: phocean/john_the_ripper_jumbo
+    source: pull
+  become: true
+  become_user: root
+
+#  tag: phocean/jtr

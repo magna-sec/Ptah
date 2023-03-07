@@ -1,0 +1,8 @@
+---
+# Create tools folder is does not exist
+- name: Create various tmp directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop: "{{ TmpPaths }}"

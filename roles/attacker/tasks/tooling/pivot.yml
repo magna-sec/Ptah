@@ -1,0 +1,76 @@
+---
+### Its this way because of .gz
+############## Chisel - Linux
+- name: Checking for Linux Chisel
+  stat: 
+    path: "{{ Pivot }}/chisel-linux"
+  register:  linux_path
+
+- name: Downloading Linux Chisel
+  ansible.builtin.get_url:
+    url: https://github.com/jpillora/chisel/releases/download/v1.8.1/chisel_1.8.1_linux_amd64.gz
+    dest: /tmp/chisel-linux.gz
+  when:  linux_path.stat.exists == false
+
+- name: Gunzip the .gz
+  ansible.builtin.shell:
+      cmd: gunzip /tmp/chisel-linux.gz && mv /tmp/chisel-linux {{ Pivot }}/chisel-linux
+  when:  linux_path.stat.exists == false
+
+############## Chisel - Windows
+- name: Checking for Windows Chisel
+  stat: 
+    path: "{{ Pivot }}/chisel-windows.exe"
+  register:  windows_path
+
+- name: Downloading Windows Chisel
+  ansible.builtin.get_url:
+    url: https://github.com/jpillora/chisel/releases/download/v1.8.1/chisel_1.8.1_windows_amd64.gz
+    dest: /tmp/chisel-windows.exe.gz
+  when:  windows_path.stat.exists == false
+
+- name: Gunzip the .gz
+  ansible.builtin.shell:
+      cmd: gunzip /tmp/chisel-windows.exe.gz && mv /tmp/chisel-windows.exe {{ Pivot }}/chisel-windows.exe
+  when:  windows_path.stat.exists == false
+
+
+############## Ligolo-ng
+# Check for existance of ligolo
+- name: Checking for ligolo
+  stat: 
+    path: "{{ Pivot }}/ligolo-ng"
+  register: ligolo_path
+
+# Cloning -> Installing if path doesn't exist
+- name: Cloning ligolo
+  ansible.builtin.git:
+    repo: https://github.com/nicocha30/ligolo-ng
+    dest: "{{ Pivot }}/ligolo-ng"
+    single_branch: yes
+    version: master
+  when: ligolo_path.stat.exists == false
+
+ 
+ # Install ligolo
+- name: Create ligolo agent
+  ansible.builtin.shell:
+      cmd: go build -o agent cmd/agent/main.go
+      chdir: "{{ Pivot }}/ligolo-ng"
+
+- name: Create ligolo proxy
+  ansible.builtin.shell:
+      cmd: go build -o proxy cmd/proxy/main.go
+      chdir: "{{ Pivot }}/ligolo-ng"
+
+- name: Create ligolo windows agent
+  ansible.builtin.shell:
+      cmd: GOOS=windows go build -o agent.exe cmd/agent/main.go
+      chdir: "{{ Pivot }}/ligolo-ng"
+
+- name: Create ligolo windows proxy
+  ansible.builtin.shell:
+      cmd: GOOS=windows go build -o proxy.exe cmd/proxy/main.go
+      chdir: "{{ Pivot }}/ligolo-ng"
+
+

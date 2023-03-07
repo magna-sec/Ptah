@@ -1,0 +1,6 @@
+# Create tools folder is does not exist
+- name: Create ~/tools if it does not exist
+  ansible.builtin.file:
+    path: /home/{{ ansible_user_id }}/tools
+    state: directory
+    mode: '0755'

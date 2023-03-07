@@ -1,0 +1,105 @@
+---
+############## unhook-bof
+- name: Checking for unhook-bof
+  stat: 
+    path: "{{ Bofs }}/Unhook"
+  register: bof_path
+
+- name: Cloning unhook-bof
+  ansible.builtin.git:
+    repo: https://github.com/rsmudge/unhook-bof
+    dest: "{{ Bofs }}/Unhook"
+    single_branch: yes
+    version: master
+  when: bof_path.stat.exists == false
+
+############## CheeseTools
+- name: Checking for CheeseTools
+  stat: 
+    path: "{{ Bofs }}/CheeseTools"
+  register: bof_path
+
+- name: Cloning CheeseTools
+  ansible.builtin.git:
+    repo: https://github.com/klezVirus/CheeseTools
+    dest: "{{ Bofs }}/CheeseTools"
+    single_branch: yes
+    version: master
+  when: bof_path.stat.exists == false
+  
+############## HelpColor
+- name: Checking for HelpColor
+  stat: 
+    path: "{{ Bofs }}/HelpColor"
+  register: bof_path
+
+- name: Cloning HelpColor
+  ansible.builtin.git:
+    repo: https://github.com/outflanknl/HelpColor
+    dest: "{{ Bofs }}/HelpColor"
+    single_branch: yes
+    version: master
+  when: bof_path.stat.exists == false
+
+############## CS-Remote-OPs-BOF
+- name: Checking for CS-Remote-OPs-BOF
+  stat: 
+    path: "{{ Bofs }}/CS-Remote-OPs"
+  register: bof_path
+
+- name: Cloning CS-Remote-OPs-BOF
+  ansible.builtin.git:
+    repo: https://github.com/trustedsec/CS-Remote-OPs-BOF
+    dest: "{{ Bofs }}/CS-Remote-OPs"
+    single_branch: yes
+    version: master
+  when: bof_path.stat.exists == false
+
+############## ajpc500-BOFs
+- name: Checking for ajpc500-BOFs
+  stat: 
+    path: "{{ Bofs }}/Ajpc500"
+  register: bof_path
+
+- name: Cloning ajpc500-BOFs
+  ansible.builtin.git:
+    repo: https://github.com/ajpc500/BOFs
+    dest: "{{ Bofs }}/Ajpc500"
+    single_branch: yes
+    version: master
+  when: bof_path.stat.exists == false
+
+############## ServiceMove-BOF
+- name: Checking for ServiceMove-BOF
+  stat: 
+    path: "{{ Bofs }}/ServiceMove"
+  register: bof_path
+
+- name: Cloning ServiceMove-BOF
+  ansible.builtin.git:
+    repo: https://github.com/netero1010/ServiceMove-BOF
+    dest: "{{ Bofs }}/ServiceMove"
+    single_branch: yes
+    version: master
+  when: bof_path.stat.exists == false
+
+############## Yaxser-Bof
+- name: Checking for Yaxser
+  stat: 
+    path: "{{ Bofs }}/Yaxser"
+  register: bof_path
+
+- name: Cloning Yaxser
+  ansible.builtin.git:
+    repo: https://github.com/Yaxser/CobaltStrike-BOF
+    dest: "{{ Bofs }}/Yaxser"
+    single_branch: yes
+    version: master
+  when: bof_path.stat.exists == false
+
+
+
+
+
+
+

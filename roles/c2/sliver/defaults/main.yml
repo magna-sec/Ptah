@@ -1,0 +1,10 @@
+---
+SliverPackages:
+  - make
+  - sed
+  - tar
+  - curl
+  - zip
+  - gcc
+
+SliverPath: "/home/{{ ansible_user_id }}/Sliver"

@@ -1,0 +1,24 @@
+---
+# Give every user 1x misconfig
+- include_tasks: "misconfigs/{{ User_Misconfigs | random }}"
+  vars:
+    selection: "{{ item }}"
+  loop: "{{ Usernames }}"
+
+# Add every user to a random group
+- include_tasks: "misconfigs/join_group.yml"
+  vars:
+    selection: "{{ item }}"
+  loop: "{{ Usernames }}"
+
+# Give every group 1x misconfig
+- include_tasks: "misconfigs/{{ Group_Misconfigs | random }}"
+  vars:
+    selection: "{{ item }}"
+  loop: "{{ Groups }}"
+
+# Give every computer 1x misconfig
+- include_tasks: "misconfigs/{{ Computer_Misconfigs | random }}"
+  vars:
+    selection: "{{ item }}$"
+  loop: "{{ Computers }}"

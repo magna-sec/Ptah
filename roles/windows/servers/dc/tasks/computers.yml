@@ -1,0 +1,9 @@
+---
+# https://learn.microsoft.com/en-us/powershell/module/activedirectory/new-adcomputer?view=windowsserver2022-ps
+
+- name: Powershell - Adding machine accounts
+  ansible.windows.win_powershell:
+    script: |
+      New-ADComputer -Name {{ item }}
+  when: '"dc" not in item '
+  loop: "{{ Computers }}"

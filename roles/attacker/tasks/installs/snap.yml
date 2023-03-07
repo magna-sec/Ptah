@@ -1,0 +1,8 @@
+---
+- name: Installing various snap packages
+  community.general.snap:
+    name: "{{ item }}"
+    classic: true
+  become: true
+  become_user: root
+  loop: "{{ SnapInstalls }}"

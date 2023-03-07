@@ -1,0 +1,59 @@
+Local_Misconfig_Path: roles/windows/local_misconfigs/make_local_misconfig.yml
+
+# Yes I couldnt find it with a relative path.. add it to the stuff to fix
+Local_Misconfigs:
+ - roles/windows/local_misconfigs/local_admin.yml
+ - roles/windows/local_misconfigs/service_manager.yml
+ - roles/windows/local_misconfigs/unquoted_service.yml
+ 
+Local_Services:
+ - AttemptService
+ - BlindService
+ - BroadService
+ - BrownService
+ - ButtonService
+ - CertainService
+ - CloisteredService
+ - CoatService
+ - CompleteService
+ - CowsService
+ - DebonairService
+ - DependService
+ - EidacticService
+ - DoubleService
+ - EntertainingService
+ - ExuberantService
+ - FireService
+ - FlutteringService
+ - HarassService
+ - HeadService
+ - ImproveService
+ - InterfereService
+ - LikeableService
+ - MilitaryService
+ - MoveService
+ - NostalgicService
+ - ObsceneService
+ - PeacefulService
+ - PuffyService
+ - PullService
+ - QuirkyService
+ - RecogniseService
+ - RetireService
+ - ScaredService
+ - SpotlessService
+ - SquareService
+ - StandingService
+ - StraightService
+ - StrengthenService
+ - TestyService
+ - ThoughtService
+ - ThreeService
+ - TorpidService
+ - TrailService
+ - UnusualService
+ - VisitService
+ - WastefulService
+ - WelcomeService
+ - WristService
+ - ZoomService

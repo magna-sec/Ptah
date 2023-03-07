@@ -1,0 +1,12 @@
+---
+# Create structure for tooling
+- include_tasks: folders.yml
+# Install C2s
+- include_role: name=c2/cobaltstrike
+- include_role: name=c2/sliver
+- include_role: name=c2/poshc2
+# Install loaders
+- include_role: name=loaders/scarecrow
+- include_role: name=loaders/freeze
+- include_role: name=loaders/donut
+- include_role: name=loaders/ivy

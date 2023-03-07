@@ -1,0 +1,7 @@
+---
+- name: Adding {{ selection }} to Key Admins
+  community.windows.win_domain_group_membership:
+    name: "Key Admins"
+    members:
+      - "{{ selection }}"
+    state: present

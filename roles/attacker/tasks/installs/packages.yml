@@ -1,0 +1,27 @@
+---
+# Add Keys and Update apt
+- include_tasks: keys.yml
+
+# apt upgrade
+- name: Upgrade apt packages
+  apt:
+    upgrade: yes
+  become: true
+  become_user: root
+
+# Installing packages
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  become: true
+  become_user: root
+  loop: "{{ InitialPackages }}"
+
+# Install gem packages
+- gem:
+    name: "{{ item }}"
+    state: latest
+  become: true 
+  become_user: root
+  loop: "{{ GemInstalls }}"

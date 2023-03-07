@@ -1,0 +1,57 @@
+---
+- include_tasks: folders.yml
+# Installing packages
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  become: true
+  become_user: root
+  loop: "{{ CSPackages }}"
+    
+# Check for existance of CobaltStrike
+- name: Checking for CobaltStrike
+  stat: 
+    path: "{{ CSPath }}"
+  register: cs_path
+
+
+### HARD CODED CAUSE I AINT GIVING U CS
+- name: Download CobaltStrike
+  ansible.builtin.unarchive:
+    src: http://192.168.190.154/cs.zip
+    dest: "/tmp/cs"
+    remote_src: yes
+  when: cs_path.stat.exists == false
+
+# Check for existance of kits
+- name: Checking for CobaltStrike Kits 
+  stat: 
+    path: "{{ KitsPath }}"
+  register: kits_path
+
+### HARD CODED CAUSE I AINT GIVING U CS
+- name: Download CobaltStrike kits
+  ansible.builtin.unarchive:
+    src: http://192.168.190.154/kits.zip
+    dest: "/tmp/kits"
+    remote_src: yes
+  when: kits_path.stat.exists == false
+
+# Fix weird unzipping to tidy
+- name: Fixing names CobaltStrike
+  ansible.builtin.shell:
+      cmd: mv /tmp/cs/* {{ CSPath }}
+  when: cs_path.stat.exists == false
+
+- name: Fixing names Kits
+  ansible.builtin.shell:
+      cmd: mv /tmp/kits/* {{ KitsPath }}
+  when: kits_path.stat.exists == false
+
+# Remove tmp files
+- name: Recursively remove tmp directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop: "{{ TmpPaths }}"

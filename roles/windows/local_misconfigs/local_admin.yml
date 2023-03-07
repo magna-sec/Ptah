@@ -1,0 +1,13 @@
+---
+# https://docs.ansible.com/ansible/latest/collections/community/windows/win_group_membership_module.html
+
+- name: Pick random username
+  set_fact:
+    selection: "{{ Usernames | random }}"
+
+- name: Put {{ selection }} into local administrators on {{ inventory_hostname }}
+  ansible.windows.win_group_membership:
+    name: administrators
+    members:
+      - '{{ NetBIOS }}\{{ selection }}'
+    state: present

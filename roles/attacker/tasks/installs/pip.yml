@@ -1,0 +1,11 @@
+---
+# Creating odd conflict
+- name: Recursively remove OpenSSL directory that is causing a conflict
+  ansible.builtin.file:
+    path: "/home/{{ ansible_user_id }}/.local/lib/python3.8/site-packages/OpenSSL/"
+    state: absent
+
+- name: Install various python packages
+  ansible.builtin.pip:
+    name: "{{ item }}"
+  loop: "{{ PipInstalls }}"

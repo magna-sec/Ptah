@@ -1,0 +1,10 @@
+---
+# https://github.com/PhilKeeble/AWS-RedTeam-ADLab/blob/main/dsc/adlab.ps1
+
+- name: Powershell - Give {{ selection }} DoesNotRequirePreAuth 
+  ansible.windows.win_powershell:
+    script: |
+      Set-ADAccountControl -Identity "{{ selection }}" -DoesNotRequirePreAuth $true
+
+
+

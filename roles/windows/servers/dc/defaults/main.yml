@@ -1,0 +1,45 @@
+---
+User_Misconfigs:
+  - ../../../local_misconfigs/local_admin.yml # Groups
+  - domain_admin.yml
+  - dnsadmin.yml
+  - key_admin.yml
+  - desc_password.yml # Idiot move
+  - dcsync.yml # Rights
+  - user/user_all.yml # ACLs
+  - user/user_write.yml
+  - user/group_all.yml
+  - user/group_write.yml
+  - user/machine_write.yml
+  - user/machine_all.yml
+  - user/write_dacl.yml
+  - user/asrep.yml
+  - user/roast.yml
+
+
+Group_Misconfigs:
+  - domain_admin.yml
+  - dnsadmin.yml
+  - key_admin.yml
+  - dcsync.yml # Rights
+  - group/user_all.yml # ACLs
+  - group/user_write.yml
+  - group/group_all.yml
+  - group/group_write.yml
+  - group/machine_write.yml
+  - group/machine_all.yml
+  - group/write_dacl.yml
+
+Computer_Misconfigs:
+  - domain_admin.yml
+  - dnsadmin.yml
+  - key_admin.yml
+  - dcsync.yml # Rights
+  - computer/user_all.yml # ACLs
+  - computer/user_write.yml
+  - computer/group_all.yml
+  - computer/group_write.yml
+  - computer/machine_write.yml
+  - computer/machine_all.yml
+  - computer/write_dacl.yml
+  - computer/constrained.yml # Delegation

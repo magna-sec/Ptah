@@ -1,0 +1,5 @@
+---
+# Create structure for tooling
+- include_tasks: folders.yml
+# Install C2s
+- include_role: name=webs/nginx

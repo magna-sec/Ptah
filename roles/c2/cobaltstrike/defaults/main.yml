@@ -1,0 +1,11 @@
+---
+TmpPaths:
+  - /tmp/cs
+  - /tmp/kits
+
+CSPackages:
+  - openjdk-11-jdk
+  - unzip
+
+CSPath: "/home/{{ ansible_user_id }}/CobaltStrike"
+KitsPath: "/home/{{ ansible_user_id }}/CobaltStrike/Kits"

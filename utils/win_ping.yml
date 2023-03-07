@@ -1,0 +1,15 @@
+---
+- name: win_ping module demo
+  hosts: windows
+  become: false
+  gather_facts: false
+  tasks:
+    - name: test connection
+      ansible.windows.win_ping:
+
+    # Handy for testing variables
+    - ansible.builtin.debug:
+        msg:
+        - "Hello There: {{ inventory_hostname }}"
+        - "Nice IP of: {{ ansible_host }}"
+        - "Give all Windows machines: {{ groups['windows'] | map('extract', hostvars, ['inventory_hostname'])  }}"

@@ -1,0 +1,27 @@
+---
+# Install initial packages
+- include_tasks: installs/packages.yml
+# Create structure for tooling
+- include_tasks: folders.yml
+# Information
+- include_tasks: info.yml
+# Install various packages from pip and snap
+- include_tasks: installs/pip.yml
+- include_tasks: installs/snap.yml
+- include_tasks: installs/docker.yml
+- include_tasks: installs/john.yml
+- include_tasks: installs/metasploit.yml
+# Linux Tooling
+- include_tasks: tooling/linux.yml
+# Windows Tooling
+- include_tasks: tooling/windows.yml
+# Pivot Tooling
+- include_tasks: tooling/pivot.yml
+# CS Bofs
+- include_tasks: tooling/bofs.yml
+# User/Password Lists
+- include_tasks: lists.yml
+# Last task
+- include_tasks: tidy.yml
+
+

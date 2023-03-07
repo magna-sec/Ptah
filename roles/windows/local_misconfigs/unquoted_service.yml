@@ -1,0 +1,44 @@
+---
+# https://www.winhelponline.com/blog/view-edit-service-permissions-windows/#sc_sdshow
+- name: Pick random local service name
+  set_fact:
+    selection: "{{ Local_Services | random }}"
+
+
+- name: Split service name
+  set_fact:
+    service_name: "{{ selection.split('Service')[0] }}"
+
+# Create the misconfig
+- name: Powershell - Create unquoted service path for {{ selection }}
+  ansible.windows.win_powershell:
+    script: |
+      mkdir "C:\Program Files\{{ service_name }}"
+      mkdir "C:\Program Files\{{ service_name }}\Install Files\"
+
+# Shove in calc.exe as the "service exe", yes I know calc.exe is not a service executable.
+- name: Copy calc.exe to C:\Program Files\{{ service_name }}\Install Files\{{ selection }}.exe
+  ansible.windows.win_copy:
+    src: ../files/calc.exe
+    dest: C:\Program Files\{{ service_name }}\Install Files\{{selection}}.exe
+
+- name: Create {{ selection }} service
+  ansible.windows.win_service:
+    name: "{{ selection }}"
+    path: C:\Program Files\{{ service_name }}\Install Files\{{selection}}.exe
+    description: "{{ selection }} designed for kernel level control"
+
+- name: Powershell - Weaken {{ selection }} rights on {{ inventory_hostname }}
+  ansible.windows.win_powershell:
+    script: |
+        sc.exe sdset {{ selection }} "D:(A;;KA;;;WD)"
+
+- name: Change rights to allow hijack
+  ansible.windows.win_acl:
+    path: C:\Program Files\{{ service_name }}
+    user: Users
+    rights: FullControl
+    type: allow
+    state: present
+    inherit: ContainerInherit, ObjectInherit
+    propagation: 'None'

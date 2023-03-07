@@ -1,0 +1,167 @@
+---
+############## PrivescCheck
+- name: Downloading PrivescCheck
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/itm4n/PrivescCheck/master/PrivescCheck.ps1
+    dest: "{{ Powershell }}/PrivescCheck.ps1"
+
+- name: Downloading Kerbrute
+  ansible.builtin.get_url:
+    url: https://github.com/ropnop/kerbrute/releases/download/v1.0.3/kerbrute_linux_amd64
+    dest: "{{ Generic }}/kerbrute"
+    mode: a+x
+
+############## Powersploit
+- name: Checking for Powersploit
+  stat: 
+    path: "{{ Powershell }}/Powersploit"
+  register: powers_path
+
+- name: Cloning Powersploit
+  ansible.builtin.git:
+    repo: https://github.com/PowerShellMafia/PowerSploit
+    dest: "{{ Powershell }}/Powersploit"
+    single_branch: yes
+    version: master
+  when: powers_path.stat.exists == false
+
+############## Powermad
+- name: Checking for Powermad
+  stat: 
+    path: "{{ Powershell }}/Powermad"
+  register: powerm_path
+
+- name: Cloning Powermad
+  ansible.builtin.git:
+    repo: https://github.com/Kevin-Robertson/Powermad
+    dest: "{{ Powershell }}/Powermad"
+    single_branch: yes
+    version: master
+  when: powerm_path.stat.exists == false
+
+############## Bloodhound
+- name: Checking for Bloodhound
+  stat: 
+    path: "{{ Powershell }}/Bloodhound"
+  register: blood_path
+
+- name: Cloning Bloodhound
+  ansible.builtin.git:
+    repo: https://github.com/BloodHoundAD/BloodHound
+    dest: "{{ Powershell }}/Bloodhound"
+    single_branch: yes
+    version: master
+  when: blood_path.stat.exists == false
+
+############## PowerSharpPack
+- name: Checking for PowerSharpPack
+  stat: 
+    path: "{{ Powershell }}/PowerSharpPack"
+  register: powerp_path
+
+- name: Cloning PowerSharpPack
+  ansible.builtin.git:
+    repo: https://github.com/S3cur3Th1sSh1t/PowerSharpPack
+    dest: "{{ Powershell }}/PowerSharpPack"
+    single_branch: yes
+    version: master
+  when: powerp_path.stat.exists == false
+
+############## Ghostpack
+- name: Checking for GhostPack
+  stat: 
+    path: "{{ Info }}/Ghostpack"
+  register: ghost_path
+
+- name: Cloning GhostPack
+  ansible.builtin.git:
+    repo: https://github.com/r3motecontrol/Ghostpack-CompiledBinaries
+    dest: "{{ Exes }}/Ghostpack"
+    single_branch: yes
+    version: master
+  when: ghost_path.stat.exists == false
+
+############## Mimikatz
+- name: Checking for Mimikatz
+  stat: 
+    path: "{{ Info }}/Mimikatz"
+  register: mimi_path
+
+- name: Cloning Mimikatz
+  ansible.builtin.git:
+    repo: https://github.com/ParrotSec/mimikatz
+    dest: "{{ Exes }}/Mimikatz"
+    single_branch: yes
+    version: master
+  when: mimi_path.stat.exists == false
+
+############## ZeroLogon
+- name: Checking for ZeroLogon
+  stat: 
+    path: "{{ CVE }}/ZeroLogon"
+  register: zero_path
+
+- name: Cloning ZeroLogon
+  ansible.builtin.git:
+    repo: https://github.com/dirkjanm/CVE-2020-1472
+    dest: "{{ CVE }}/ZeroLogon"
+    single_branch: yes
+    version: master
+  when: zero_path.stat.exists == false
+
+############## Responder
+- name: Checking for Responder
+  stat: 
+    path: "{{ Generic }}/Responder"
+  register: resp_path
+
+- name: Cloning Responder
+  ansible.builtin.git:
+    repo: https://github.com/SpiderLabs/Responder
+    dest: "{{ Generic }}/Responder"
+    single_branch: yes
+    version: master
+  when: resp_path.stat.exists == false
+
+############## SysInternals
+- name: Create a Sysinternals directory
+  ansible.builtin.file:
+    path: "{{ Exes }}/SysInternals"
+    state: directory
+    mode: '0755'
+
+- name: Download Sysinternals
+  ansible.builtin.unarchive:
+    src: https://download.sysinternals.com/files/SysinternalsSuite.zip
+    dest: "{{ Exes }}/SysInternals"
+    remote_src: yes
+
+############## Powershell
+- name: Downloading packages-microsoft-prod.deb
+  ansible.builtin.get_url:
+    url: https://packages.microsoft.com/config/ubuntu/{{ ansible_facts['lsb']['release'] }}/packages-microsoft-prod.deb
+    dest: /tmp/packages-microsoft-prod.deb
+
+- name: Install packages-microsoft-prod.deb
+  ansible.builtin.apt:
+    deb: /tmp/packages-microsoft-prod.deb
+  become: true 
+  become_user: root
+
+- name: Update repositories cache 
+  ansible.builtin.apt:
+    update_cache: yes
+  become: true 
+  become_user: root
+
+- name: Install powershell
+  ansible.builtin.package:
+    name: powershell
+    state: present
+  become: true
+  become_user: root
+
+- name: Remove packages-microsoft-prod.deb
+  ansible.builtin.file:
+    path: /tmp/packages-microsoft-prod.deb
+    state: absent

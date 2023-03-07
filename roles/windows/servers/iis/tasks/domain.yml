@@ -1,0 +1,35 @@
+---
+# https://docs.ansible.com/ansible/latest/collections/ansible/windows/win_feature_module.html
+# Change hostname
+- name: Change the hostname {{ inventory_hostname }}
+  ansible.windows.win_hostname:
+    name: "{{ inventory_hostname }}"
+
+# Set DNS
+- name: Set internal DNS server 
+  ansible.windows.win_dns_client:
+    adapter_names: '*'
+    ipv4_addresses:
+    - "{{ groups['dc'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+
+# Set static IP
+- name: Powershell - Set static IP address - THIS WILL FAIL, IT IS NORMAL
+  ansible.windows.win_powershell:
+    script: |
+      netsh interface ip set address Ethernet0 static {{ ansible_host }} {{ windows_mask }} {{ windows_gateway }}
+  ignore_unreachable: true
+
+- name: Reboot for hostname change
+  win_reboot:
+   pre_reboot_delay: 15
+
+- name: Joining {{ inventory_hostname }} to {{ Domain }}
+  ansible.windows.win_domain_membership:
+    dns_domain_name: "{{ Domain }}"
+    domain_admin_user: administrator@{{ Domain }}
+    domain_admin_password: Passw0rd!
+    state: domain
+  register: domain_state
+
+- ansible.windows.win_reboot:
+  when: domain_state.reboot_required

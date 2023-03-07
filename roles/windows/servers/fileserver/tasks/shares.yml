@@ -1,0 +1,63 @@
+---
+- name: Create PublicVault folder structure
+  ansible.windows.win_file:
+    path: C:\PublicVault
+    state: directory
+
+- name: Create SecretVault folder structure
+  ansible.windows.win_file:
+    path: C:\SecretVault
+    state: directory
+
+- name: Add public share
+  ansible.windows.win_share:
+    name: PublicVault
+    description: Store for shared files here
+    path: C:\PublicVault
+    list: yes
+    full: Administrators
+    read: "Authenticated Users"
+
+- name: Add secret share
+  ansible.windows.win_share:
+    name: SecretVault
+    description: Top secret docs!
+    path: C:\SecretVault
+    list: no
+    full: Administrators
+    read: Administrators
+
+# TRIED DO THIS WITH win_share but for the love of **** couldnt get it to work
+- name: Powershell - Change access rights on PublicVault
+  ansible.windows.win_powershell:
+    script: |
+          $password = ConvertTo-SecureString "Passw0rd!" -AsPlainText -Force
+          $creds = New-Object System.Management.Automation.PSCredential ("{{ Domain }}\administrator", $password)
+          $sess = New-PSSession -ComputerName {{ inventory_hostname }} -credential $creds
+          Invoke-Command -Session $sess -scriptblock { $dir = "C:\PublicVault"}
+          Invoke-Command -Session $sess -scriptblock { $Acl = Get-Acl -Path "$dir"}
+          Invoke-Command -Session $sess -scriptblock { $identity = '{{ Domain }}\{{ Groups | random }}'}
+          Invoke-Command -Session $sess -scriptblock { $rights = 'FullControl'}
+          Invoke-Command -Session $sess -scriptblock { $inheritance = 'ContainerInherit, ObjectInherit'}
+          Invoke-Command -Session $sess -scriptblock { $propagation = 'None'}
+          Invoke-Command -Session $sess -scriptblock { $type = 'Allow'}
+          Invoke-Command -Session $sess -scriptblock { $ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)}
+          Invoke-Command -Session $sess -scriptblock { $Acl.AddAccessRule($ACE)}
+          Invoke-Command -Session $sess -scriptblock { Set-Acl -Path "$dir" -AclObject $Acl}
+
+- name: Powershell - Change access rights on SecretVault
+  ansible.windows.win_powershell:
+    script: |
+          $password = ConvertTo-SecureString "Passw0rd!" -AsPlainText -Force
+          $creds = New-Object System.Management.Automation.PSCredential ("{{ Domain }}\administrator", $password)
+          $sess = New-PSSession -ComputerName {{ inventory_hostname }} -credential $creds
+          Invoke-Command -Session $sess -scriptblock { $dir = "C:\SecretVault"}
+          Invoke-Command -Session $sess -scriptblock { $Acl = Get-Acl -Path "$dir"}
+          Invoke-Command -Session $sess -scriptblock { $identity = '{{ Domain }}\{{ Groups | random }}'}
+          Invoke-Command -Session $sess -scriptblock { $rights = 'FullControl'}
+          Invoke-Command -Session $sess -scriptblock { $inheritance = 'ContainerInherit, ObjectInherit'}
+          Invoke-Command -Session $sess -scriptblock { $propagation = 'None'}
+          Invoke-Command -Session $sess -scriptblock { $type = 'Allow'}
+          Invoke-Command -Session $sess -scriptblock { $ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)}
+          Invoke-Command -Session $sess -scriptblock { $Acl.AddAccessRule($ACE)}
+          Invoke-Command -Session $sess -scriptblock { Set-Acl -Path "$dir" -AclObject $Acl}

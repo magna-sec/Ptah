@@ -1,0 +1,22 @@
+---
+# https://github.com/PhilKeeble/AWS-RedTeam-ADLab/blob/main/dsc/adlab.ps1
+
+- name: Pick random computer for WriteDACL
+  set_fact:
+    rand_computer: "{{ Computers | random }}"
+
+# Tested working: Server 2016
+- name: Powershell - Give {{ selection }} write DACL over {{ rand_computer}}
+  ansible.windows.win_powershell:
+    script: |
+      $Destination = (Get-ADComputer -Identity "{{ rand_computer }}").DistinguishedName
+      $Source = (Get-ADComputer -Identity "{{ selection }}").sid
+      $Rights = "WriteDACL"
+      $ADObject = [ADSI]("LDAP://" + $Destination)
+      $identity = $Source
+      $adRights = [System.DirectoryServices.ActiveDirectoryRights]$Rights
+      $type = [System.Security.AccessControl.AccessControlType] "Allow"
+      $inheritanceType = [System.DirectoryServices.ActiveDirectorySecurityInheritance] "All"
+      $ACE = New-Object System.DirectoryServices.ActiveDirectoryAccessRule $identity,$adRights,$type,$inheritanceType
+      $ADObject.psbase.ObjectSecurity.AddAccessRule($ACE)
+      $ADObject.psbase.commitchanges()

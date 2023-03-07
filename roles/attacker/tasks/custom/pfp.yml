@@ -1,0 +1,14 @@
+---
+- name: Download profile picture
+  ansible.builtin.get_url:
+    url: https://avatars.githubusercontent.com/u/72981738?v=4 
+    dest: "/var/lib/AccountsService/icons/{{ ansible_user_id }}"
+	become: true
+	become_user: root
+	when: "magna" in {{ ansible_user_id }}
+
+# Update settings...?
+- name: Update user picture...?
+  ansible.builtin.shell:
+      cmd: sed -i '/Icon=/c\Icon=/var/lib/AccountsService/icons/'{{ ansible_user_id }} /var/lib/AccountsService/users/{{ ansible_user_id }}
+

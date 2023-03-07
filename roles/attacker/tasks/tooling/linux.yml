@@ -1,0 +1,61 @@
+---
+############## LinPeas
+- name: Downloading LinPeas
+  ansible.builtin.get_url:
+    url: https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas.sh
+    dest: "{{ Linux }}/linpeas.sh"
+
+- name: Downloading pspy64
+  ansible.builtin.get_url:
+    url: https://github.com/DominicBreuker/pspy/releases/download/v1.2.0/pspy64
+    dest: "{{ Linux }}/pspy64"
+
+- name: Downloading pspy32
+  ansible.builtin.get_url:
+    url: https://github.com/DominicBreuker/pspy/releases/download/v1.2.0/pspy32
+    dest: "{{ Linux }}/pspy32"
+
+############## Git-Dumper
+- name: Checking for Git-Dumper
+  stat: 
+    path: "{{ Linux }}/Git-Dumper"
+  register:  dumper_path
+
+# Cloning if path doesn't exist
+- name: Cloning Git-Dumper
+  ansible.builtin.git:
+    repo: https://github.com/arthaud/git-dumper
+    dest: "{{ Linux }}/Git-Dumper"
+    single_branch: yes
+    version: master
+  when:  dumper_path.stat.exists == false
+
+############## Git-Tools
+- name: Checking for Git-Tools
+  stat: 
+    path: "{{ Linux }}/Git-Tools"
+  register:  gitt_path
+
+# Cloning if path doesn't exist
+- name: Cloning Git-Tools
+  ansible.builtin.git:
+    repo: https://github.com/internetwache/GitTools
+    dest: "{{ Linux }}/Git-Tools"
+    single_branch: yes
+    version: master
+  when:  gitt_path.stat.exists == false
+
+############## SubDomainizer
+- name: Checking for SubDomainizer
+  stat: 
+    path: "{{ Linux }}/SubDomainizer"
+  register:  sub_path
+
+# Cloning if path doesn't exist
+- name: Cloning SubDomainizer
+  ansible.builtin.git:
+    repo: https://github.com/nsonaniya2010/SubDomainizer
+    dest: "{{ Linux }}/SubDomainizer"
+    single_branch: yes
+    version: master
+  when:  sub_path.stat.exists == false

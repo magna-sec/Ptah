@@ -1,0 +1,23 @@
+---
+# Check for existance of PoshC2
+- name: Checking for PoshC2
+  stat: 
+    path: "{{ PoshC2Path }}"
+  register: PoshC2_path
+
+# Pull Posh2
+- name: Cloning PoshC2
+  ansible.builtin.git:
+    repo: https://github.com/nettitude/PoshC2
+    dest: "{{ PoshC2Path }}"
+    single_branch: yes
+    version: master
+  when: PoshC2_path.stat.exists == false
+
+- name: Installing PoshC2
+  ansible.builtin.shell: bash ./Install.sh
+  args:
+    chdir: "{{ PoshC2Path }}"
+  become: true
+  become_user: root
+  when: PoshC2_path.stat.exists == false

@@ -1,0 +1,31 @@
+---
+# Installing packages
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  become: true
+  become_user: root
+  loop: "{{ DonutPackages }}"
+  
+    
+# Check for existance of donut
+- name: Checking for Donut
+  stat: 
+    path: "{{ DonutPath }}"
+  register: donut_path
+
+# Cloning -> Installing if path doesn't exist
+- name: Cloning Donut
+  ansible.builtin.git:
+    repo: http://github.com/thewover/donut.git
+    dest: "{{ DonutPath }}"
+    single_branch: yes
+    version: master
+  when: donut_path.stat.exists == false
+
+ # Install Donut
+- name: Install Donut
+  ansible.builtin.shell:
+      cmd: make
+      chdir: "{{ DonutPath }}"

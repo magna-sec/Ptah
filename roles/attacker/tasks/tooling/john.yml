@@ -1,0 +1,32 @@
+---
+# Check for existance of 2John
+- name: Checking for 2John
+  stat: 
+    path: "{{ Tools }}/2John/kirbi2john.py"
+  register:  tojohn_path
+
+# Cloning if path doesn't exist
+- name: Cloning 2John tools
+  ansible.builtin.git:
+    repo: https://github.com/openwall/john
+    dest: "/tmp/john"
+    single_branch: yes
+    version: bleeding-jumbo
+  when:  tojohn_path.stat.exists == false
+
+# Taking only john files we want
+- name: Getting 2John scripts nd stuff
+  ansible.builtin.shell:
+      cmd: mv /tmp/john/run/ {{ Tools }}/2John
+  when: tojohn_path.stat.exists == false
+
+# Remove unwanted files
+- name: Recursively remove /tmp/john directory
+  ansible.builtin.file:
+    path: /tmp/john
+    state: absent
+
+- name: Download jwt2john.py
+  ansible.builtin.get_url:
+    url: https://github.com/Sjord/jwtcrack/raw/master/jwt2john.py
+    dest: "{{ Tools }}/2John/jwt2john.py"

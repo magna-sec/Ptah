@@ -1,0 +1,28 @@
+---
+############## Windows-AD-attacking
+- name: Checking for Windows-AD-attacking
+  stat: 
+    path: "{{ Info }}/Windows-AD-attacking"
+  register: winad_path
+
+- name: Cloning Windows-AD-attacking
+  ansible.builtin.git:
+    repo: https://github.com/HitmanAlharbi/Windows-AD-attacking
+    dest: "{{ Info }}/Windows-AD-attacking"
+    single_branch: yes
+    version: main
+  when: winad_path.stat.exists == false
+
+############## RedTeaming_CheatSheet
+- name: Checking for RedTeaming_CheatSheet
+  stat: 
+    path: "{{ Info }}/RedTeaming_CheatSheet"
+  register: red_path
+
+- name: Cloning RedTeaming_CheatSheet
+  ansible.builtin.git:
+    repo: https://github.com/0xJs/RedTeaming_CheatSheet
+    dest: "{{ Info }}/RedTeaming_CheatSheet"
+    single_branch: yes
+    version: main
+  when: red_path.stat.exists == false

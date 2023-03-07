@@ -1,0 +1,10 @@
+---
+# https://docs.ansible.com/ansible/latest/collections/community/windows/win_domain_group_membership_module.html
+
+# Tested working: Server 2016
+- name: Adding {{ selection }} to Domain Admins
+  community.windows.win_domain_group_membership:
+    name: "Domain Admins"
+    members:
+      - "{{ selection }}"
+    state: present

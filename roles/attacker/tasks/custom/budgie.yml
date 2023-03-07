@@ -1,0 +1,8 @@
+---
+# Installing budgie
+- name: Install budgie
+  ansible.builtin.package:
+    name: ubuntu-budgie-desktop
+    state: present
+  become: true
+  become_user: root

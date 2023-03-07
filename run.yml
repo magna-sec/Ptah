@@ -1,0 +1,34 @@
+---
+######## LINUX
+- hosts: attacker
+  roles:
+    - attacker
+
+- hosts: teamserver
+  roles:
+    - teamserver
+
+- hosts: redirector
+  roles:
+    - redirector
+
+######## WINDOWS
+- hosts: dc
+  roles:
+    - windows/servers/dc
+
+- hosts: iis
+  roles:
+    - windows/servers/iis
+
+- hosts: cert
+  roles:
+    - windows/servers/ca
+
+- hosts: fileserver
+  roles:
+    - windows/servers/fileserver
+
+- hosts: workstation
+  roles:
+    - windows/workstation

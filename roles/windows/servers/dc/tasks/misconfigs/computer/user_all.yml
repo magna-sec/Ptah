@@ -1,0 +1,23 @@
+---
+# https://github.com/PhilKeeble/AWS-RedTeam-ADLab/blob/main/dsc/adlab.ps1  
+# https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces
+
+- name: Pick random username for GenericAll
+  set_fact:
+    rand_user: "{{ Usernames | random }}"
+
+# Tested working: Server 2016
+- name: Powershell - Give {{ selection }} GenericAll over {{ rand_user }}
+  ansible.windows.win_powershell:
+    script: |
+      $Destination = (Get-ADUser -Identity "{{ rand_user }}").DistinguishedName
+      $Source = (Get-ADComputer -Identity "{{ selection }}").sid
+      $Rights = "GenericAll"
+      $ADObject = [ADSI]("LDAP://" + $Destination)
+      $identity = $Source
+      $adRights = [System.DirectoryServices.ActiveDirectoryRights]$Rights
+      $type = [System.Security.AccessControl.AccessControlType] "Allow"
+      $inheritanceType = [System.DirectoryServices.ActiveDirectorySecurityInheritance] "All"
+      $ACE = New-Object System.DirectoryServices.ActiveDirectoryAccessRule $identity,$adRights,$type,$inheritanceType
+      $ADObject.psbase.ObjectSecurity.AddAccessRule($ACE)
+      $ADObject.psbase.commitchanges()

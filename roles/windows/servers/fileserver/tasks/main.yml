@@ -1,0 +1,4 @@
+---
+- include_tasks: domain.yml
+- include_tasks: shares.yml
+- include_tasks: "{{ Local_Misconfig_Path }}"

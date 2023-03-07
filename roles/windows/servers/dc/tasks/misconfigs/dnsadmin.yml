@@ -1,0 +1,10 @@
+---
+# https://docs.ansible.com/ansible/latest/collections/community/windows/win_domain_group_membership_module.html
+# https://github.com/dim0x69/dns-exe-persistance
+
+- name: Adding {{ selection }} to DnsAdmins
+  community.windows.win_domain_group_membership:
+    name: "DnsAdmins"
+    members:
+      - "{{ selection }}"
+    state: present

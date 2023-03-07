@@ -1,0 +1,24 @@
+---
+# https://github.com/PhilKeeble/AWS-RedTeam-ADLab/blob/main/dsc/adlab.ps1
+# https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces
+
+
+- name: Pick random group for GenericWrite
+  set_fact:
+    rand_group: "{{ Groups | random }}"
+
+# Tested working: Server 2016
+- name: Powershell - Give {{ selection }} GenericWrite over {{ rand_group }}
+  ansible.windows.win_powershell:
+    script: |
+      $Destination = (Get-ADGroup -Identity {{ rand_group }}).DistinguishedName
+      $Source = (Get-ADGroup -Identity "{{ selection }}").sid
+      $Rights = "GenericWrite"
+      $ADObject = [ADSI]("LDAP://" + $Destination)
+      $identity = $Source
+      $adRights = [System.DirectoryServices.ActiveDirectoryRights]$Rights
+      $type = [System.Security.AccessControl.AccessControlType] "Allow"
+      $inheritanceType = [System.DirectoryServices.ActiveDirectorySecurityInheritance] "All"
+      $ACE = New-Object System.DirectoryServices.ActiveDirectoryAccessRule $identity,$adRights,$type,$inheritanceType
+      $ADObject.psbase.ObjectSecurity.AddAccessRule($ACE)
+      $ADObject.psbase.commitchanges()

@@ -1,0 +1,8 @@
+---
+# Give every computer 1x local misconfig
+- name: Pick random local misconfig
+  set_fact:
+    misconfig: "{{ Local_Misconfigs | random }}"
+
+# Give every computer 1x misconfig
+- include_tasks: "{{ misconfig }}"

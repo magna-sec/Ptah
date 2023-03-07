@@ -1,0 +1,36 @@
+---
+# Installing Golang
+- name: Installing golang
+  community.general.snap:
+    name: go
+    classic: true
+  become: true
+  become_user: root
+
+# Check for existance of Ivy
+- name: Checking for Ivy
+  stat: 
+    path: "{{ IvyPath }}"
+  register: Ivy_path
+
+# Cloning -> Installing if path doesn't exist
+- name: Cloning Ivy
+  ansible.builtin.git:
+    repo: https://github.com/optiv/Ivy
+    dest: "{{ IvyPath }}"
+    single_branch: yes
+    version: main
+  when: Ivy_path.stat.exists == false
+
+ # Install Ivy go dependencies
+- name: Install Ivy go dependencies
+  ansible.builtin.shell:
+      cmd: go get github.com/{{ item }}
+      chdir: "{{ IvyPath }}"
+  loop: "{{ IvyDeps }}"
+ 
+ # Install Ivy
+- name: Install Ivy
+  ansible.builtin.shell:
+      cmd: go build Ivy.go
+      chdir: "{{ IvyPath }}"

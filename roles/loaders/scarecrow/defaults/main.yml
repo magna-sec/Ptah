@@ -1,0 +1,11 @@
+---
+ScareCrowPackages:
+  - openssl
+  - osslsigncode
+  - mingw-w64
+ScareCrowPath: "/home/{{ ansible_user_id }}/tools/loaders/ScareCrow"
+ScareCrowDeps:
+  - "fatih/color"
+  - "yeka/zip"
+  - "josephspurrier/goversioninfo"
+  - "mattn/go-isatty"

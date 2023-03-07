@@ -1,0 +1,13 @@
+---
+- name: Download Metasploit installer
+  become: true
+  get_url:
+    url: https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb
+    dest: /tmp/msfinstall
+    mode: 0755
+  register: metasploit
+
+- name: Install Metasploit
+  command: /tmp/msfinstall
+  become: true
+  become_user: root

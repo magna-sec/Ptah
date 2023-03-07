@@ -1,0 +1,42 @@
+---
+# https://madlabber.wordpress.com/2019/09/08/creating-a-new-active-directory-forest-with-ansible/
+
+# Change hostname
+- name: Change the hostname {{ inventory_hostname }}
+  ansible.windows.win_hostname:
+    name: "{{ inventory_hostname }}"
+
+# Set static IP
+- name: Powershell - Set static IP address - THIS WILL FAIL, IT IS NORMAL
+  ansible.windows.win_powershell:
+    script: |
+      netsh interface ip set address Ethernet0 static {{ ansible_host }} {{ windows_mask }} {{ windows_gateway }}
+  ignore_unreachable: true
+
+- name: Reboot for hostname change
+  win_reboot:
+   pre_reboot_delay: 15
+
+- name: Install Active Directory
+  ansible.windows.win_feature:
+       name: AD-Domain-Services
+       include_management_tools: yes
+       include_sub_features: yes
+       state: present
+
+- name: Create "{{ Domain }}" Domain
+  ansible.windows.win_domain:
+     dns_domain_name: "{{ Domain }}"
+     safe_mode_password: Passw0rd!
+
+- name: New Domain creation reboot
+  win_reboot:
+   pre_reboot_delay: 15
+
+- name: Ensure a server is a domain controller
+  ansible.windows.win_domain_controller:
+    dns_domain_name: "{{ Domain }}"
+    domain_admin_user: administrator@"{{ Domain }}"
+    domain_admin_password: Passw0rd!
+    safe_mode_password: Passw0rd!
+    state: domain_controller

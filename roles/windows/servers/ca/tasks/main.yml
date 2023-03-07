@@ -1,0 +1,5 @@
+---
+- include_tasks: domain.yml
+- include_tasks: ca.yml
+- include_tasks: create_certs.yml
+- include_tasks: "{{ Local_Misconfig_Path }}"

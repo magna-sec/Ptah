@@ -1,0 +1,13 @@
+---
+ApachePackages:
+  - apache2
+
+ApacheMods:
+  - rewrite 
+  - headers 
+  - proxy
+  - proxy_http
+  - ssl 
+  - cache
+
+cs2modrewritePath: "/home/{{ ansible_user_id }}/tools/cs2modrewrite"

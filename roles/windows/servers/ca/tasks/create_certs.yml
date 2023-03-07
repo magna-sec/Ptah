@@ -1,0 +1,73 @@
+---
+# https://docs.ansible.com/ansible/latest/collections/ansible/windows/win_certificate_store_module.html
+# https://social.technet.microsoft.com/Forums/lync/en-US/347acc93-8352-4535-ab1a-23ebd49eea22/duplicate-certificate-template-edit-and-publish-it?forum=winserverpowershell
+# https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-identifiers
+# https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf
+# I JUST EDITED THIS SCRIPT
+# https://github.com/GoateePFE/ADCSTemplate/blob/master/ADCSTemplate.psm1
+
+- name: Pick random certificate name
+  set_fact:
+    rand_cert: "{{ Certs | random }}"
+
+- name: Clean {{ rand_cert }}
+  set_fact:
+    rand_cert_clean: "{{ rand_cert | regex_replace('\\s') }}"
+
+# Copy modified ADCSTemplate.psm1
+- name: Copy ADCSTemplate.psm1 to C:\Users\{{ ansible_user_id }}\Documents\
+  ansible.windows.win_copy:
+    src: ADCSTemplate.psm1
+    dest: C:\Users\{{ ansible_user_id }}\Documents\
+
+# ESC1
+- name: Powershell - Creating ESC1 vulnerable certificate {{ inventory_hostname }} - {{ rand_cert }}
+  ansible.windows.win_powershell:
+    script: |
+      ipmo C:\Users\{{ ansible_user_id }}\Documents\ADCSTemplate.psm1
+      New-ADCSDrive
+      New-ADCSTemplate -DisplayName "{{ rand_cert }}" -JSON (Export-ADCSTemplate -DisplayName "Kerberos Authentication")
+      Set-ADCSTemplateACL -DisplayName "{{ rand_cert }}" -AutoEnroll -Enroll -Identity "Authenticated Users"
+      Add-CATemplate -Name "{{ rand_cert }}" -Force
+  become: yes
+  become_method: runas
+
+- name: Sleep for 300 seconds and continue (waiting for cert to establish)
+  ansible.builtin.wait_for:
+    timeout: 300
+  delegate_to: localhost
+
+- name: Powershell - Allow certificate to be issued - {{ rand_cert_clean }}
+  ansible.windows.win_powershell:
+    script: |
+      ipmo C:\Users\{{ ansible_user_id }}\Documents\ADCSTemplate.psm1
+      Add-CATemplate -Name "{{ rand_cert_clean }}" -Force
+  become: yes
+  become_method: runas
+
+# Cheers ChatGPT!
+
+     
+
+# THEFT1 Exporting certificates and their private keys using Window’s Crypto APIs
+# THEFT2 Extracting user certificates and private keys using DPAPI
+# THEFT3 Extracting machine certificates and private keys using DPAPI
+# THEFT4 Theft of existing certificates via file/directory triage
+# THEFT5 Using the Kerberos PKINIT protocol to retrieve an account’s NTLM hash
+
+# PERSIST1 Account persistence via requests for new authentication certificates for a user
+# PERSIST2 Account persistence via requests for new authentication certificates for a computer
+# PERSIST3 Account persistence via renewal of authentication certificates for a user/computer
+
+# ESC1 Domain escalation via No Issuance Requirements + Enrollable Client Authentication/Smart Card Logon OID templates + CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT
+# ESC2 Domain escalation via No Issuance Requirements + Enrollable Any Purpose EKU or no EKU
+# ESC3 Domain escalation via No Issuance Requirements + Certificate Request Agent EKU + no enrollment agent restrictions
+# ESC4 Domain escalation via misconfigured certificate template access control
+# ESC5 Domain escalation via vulnerable PKI AD Object Access Control
+# ESC6 Domain escalation via the EDITF_ATTRIBUTESUBJECTALTNAME2 setting on CAs + No Manager Approval + Enrollable Client Authentication/Smart Card Logon OID templates
+# ESC7 Vulnerable Certificate Authority Access Control
+# ESC8 NTLM Relay to AD CS HTTP Endpoints
+
+# DPERSIST1 Domain persistence via certificate forgery with stolen CA private keys
+# DPERSIST2 Domain persistence via certificate forgery from maliciously added root/intermediate/NTAuth CA certificates
+# DPERSIST3 Domain persistence via malicious misconfigurations that can later cause a domain escalation

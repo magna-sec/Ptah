@@ -1,0 +1,42 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Burp (I need to make this better)
+wget "https://portswigger-cdn.net/burp/releases/download?product=community&version=2022.12.4&type=Linux" -O ~/burp
+bash ~/burp
+rm ~/burp
+###
+
+### Create firefox structure and extensions
+fext https://addons.mozilla.org/en-GB/firefox/addon/foxyproxy-standard/ 
+fext https://addons.mozilla.org/en-GB/firefox/addon/wappalyzer/
+fext https://addons.mozilla.org/en-GB/firefox/addon/cookie-editor/
+sudo killall firefox
+###
+
+
+### Burp Certs into firefox
+f_profile=$(ls -Al ~/snap/firefox/common/.mozilla/firefox/ | grep ".default" | cut -d " " -f 9)
+waiter
+wget http://burp/cert -O burp.crt -e use_proxy=yes -e http_proxy=http://127.0.0.1:8080
+certutil -A -n "burp" -t "TC,," -i ~/burp.crt -d sql:/home/magna/snap/firefox/common/.mozilla/firefox/$f_profile
+sudo killall java # Burp runs via java
+###
+
+
+
+
+
+
+
+

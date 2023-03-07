@@ -1,0 +1,11 @@
+---
+- name: Pick random group for joining
+  set_fact:
+    rand_group: "{{ Groups | random }}"
+
+- name: Adding {{ selection }} to {{ rand_group }}
+  community.windows.win_domain_group_membership:
+    name: "{{ rand_group }}"
+    members:
+      - "{{ selection }}"
+    state: present

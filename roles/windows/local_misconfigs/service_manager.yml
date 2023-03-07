@@ -1,0 +1,7 @@
+---
+# https://twitter.com/0gtweet/status/1628720819537936386
+# https://www.winhelponline.com/blog/view-edit-service-permissions-windows/#sc_sdshow
+- name: Powershell - Weaken Service Manager rights on {{ inventory_hostname }}
+  ansible.windows.win_powershell:
+    script: |
+        sc.exe sdset scmanager "D:(A;;KA;;;WD)"

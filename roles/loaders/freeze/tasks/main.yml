@@ -1,0 +1,29 @@
+---
+# Installing Golang
+- name: Installing golang
+  community.general.snap:
+    name: go
+    classic: true
+  become: true
+  become_user: root
+
+# Check for existance of Freeze
+- name: Checking for Freeze
+  stat: 
+    path: "{{ FreezePath }}"
+  register: Freeze_path
+  
+# Cloning -> Installing if path doesn't exist
+- name: Cloning Freeze
+  ansible.builtin.git:
+    repo: https://github.com/optiv/Freeze
+    dest: "{{ FreezePath }}"
+    single_branch: yes
+    version: main
+  when: Freeze_path.stat.exists == false
+
+ # Install Freeze
+- name: Install Freeze
+  ansible.builtin.shell:
+      cmd: go build Freeze.go
+      chdir: "{{ FreezePath }}"

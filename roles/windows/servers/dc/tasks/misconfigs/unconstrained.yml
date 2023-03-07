@@ -1,0 +1,16 @@
+---
+# https://github.com/PhilKeeble/AWS-RedTeam-ADLab/blob/main/dsc/adlab.ps1
+# https://exploit.ph/user-constrained-delegation.html#:~:text=In%20a%20nutshell%2C%20unconstrained%20delegation,Sensitive%20and%20cannot%20be%20delegated.
+# https://pentestlab.blog/2022/03/21/unconstrained-delegation/
+
+- name: Powershell - Give {{ selection }} Unconstrained delegation
+  ansible.windows.win_powershell:
+    script: |
+      $user = (Get-ADUser -Identity {{ selection }}).DistinguishedName
+      Set-ADAccountControl -Identity $user -TrustedForDelegation $True
+
+# Set SPNS
+- name: Powershell - SetSPN HOST/workstation01."{{ Domain }}" for {{ selection }}
+  ansible.windows.win_powershell:
+    script: |
+      setspn -s {{ selection }}svc/{{ selection }}."{{ Domain }}" {{ selection }}

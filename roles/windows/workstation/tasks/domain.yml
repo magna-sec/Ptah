@@ -1,0 +1,47 @@
+---
+# Change hostname
+- name: Change the hostname {{ inventory_hostname }}
+  ansible.windows.win_hostname:
+    name: "{{ inventory_hostname }}"
+
+# Set DNS
+- name: Set internal DNS server 
+  ansible.windows.win_dns_client:
+    adapter_names: '*'
+    ipv4_addresses:
+    - "{{ groups['dc'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+
+# Set static IP
+- name: Powershell - Set static IP address - THIS WILL FAIL, IT IS NORMAL
+  ansible.windows.win_powershell:
+    script: |
+      netsh interface ip set address Ethernet0 static {{ ansible_host }} {{ windows_mask }} {{ windows_gateway }}
+  ignore_unreachable: true
+
+- name: Reboot for hostname change
+  win_reboot:
+   pre_reboot_delay: 30
+
+# This is needed otherwise workstations throw "Re-using the account was blocked by security policy occurs."
+# https://michlstechblog.info/blog/windows-unable-to-join-domain-re-using-the-account-was-blocked-by-security-policy/
+- name: Powershell - Add NetJoinLegacyAccountReuse due to errors joining domain
+  ansible.windows.win_powershell:
+    script: | 
+      Reg add HKLM\System\CurrentControlSet\Control\Lsa /v NetJoinLegacyAccountReuse /t REG_DWORD /d 1 /f
+
+# https://docs.ansible.com/ansible/latest/collections/ansible/windows/win_domain_membership_module.html
+- name: Joining {{ inventory_hostname }} to {{ Domain }}
+  ansible.windows.win_domain_membership:
+    dns_domain_name: "{{ Domain }}"
+    domain_admin_user: administrator@{{ Domain }}
+    domain_admin_password: Passw0rd!
+    state: domain
+  register: domain_state
+
+- ansible.windows.win_reboot:
+  when: domain_state.reboot_required
+
+- name: Powershell - Remove NetJoinLegacyAccountReuse having now joined the domain
+  ansible.windows.win_powershell:
+    script: |
+      Reg delete HKLM\System\CurrentControlSet\Control\Lsa /v NetJoinLegacyAccountReuse /f
