@@ -163,7 +163,7 @@ def edit_inventory():
         temp = {"windows_gateway": choice}
         inven_vars.update(temp)
 
-        # Mask
+        # Subnet Mask
         print(colored("Windows Subnet Mask: ", 'green'))
         choice = get_ips(1)
         temp = {"windows_mask": choice}
