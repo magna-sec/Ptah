@@ -1,7 +1,20 @@
 ---
+- include_tasks: pre_checks.yml
+
 - include_tasks: domain.yml
+  when: domain_joined == false
+
 - include_tasks: computers.yml
+  when: computers_exist == false
+
 - include_tasks: groups.yml
+  when: groups_exist == false
+
 - include_tasks: users.yml
+  when: users_exist == false
+
 - include_tasks: make_misconfigs.yml
+  when: misconfigs_exist == false
+
 - include_tasks: "{{ Local_Misconfig_Path }}"
+  when: lmisconfigs_exist == false

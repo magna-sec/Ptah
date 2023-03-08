@@ -22,3 +22,8 @@
   vars:
     selection: "{{ item }}$"
   loop: "{{ Computers }}"
+
+- name: Create killswitch file for misconfigs
+  ansible.windows.win_file:
+    path: C:\users\{{ ansible_user_id }}\Documents\misconfigs.txt
+    state: touch

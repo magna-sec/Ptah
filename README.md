@@ -48,3 +48,5 @@ Can currently deploy:
 - Add assume breach where you get a shell/beacon as a random user on a box
 - Implement hardening options: e.g. "Do u want Applocker" etc
 - Change some of the PowerShell stuff to ansible (even though i tried that...)
+- Deploy logging/siem tools for blueteam esc stuff
+- Log random users in to create creds

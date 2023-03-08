@@ -1,5 +1,8 @@
 ---
 # https://www.winhelponline.com/blog/view-edit-service-permissions-windows/#sc_sdshow
+
+
+# Tested working: Windows 10 Pro N Build 19045 
 - name: Pick random local service name
   set_fact:
     selection: "{{ Local_Services | random }}"

@@ -31,33 +31,31 @@
 - name: Powershell - Change access rights on PublicVault
   ansible.windows.win_powershell:
     script: |
-          $password = ConvertTo-SecureString "Passw0rd!" -AsPlainText -Force
-          $creds = New-Object System.Management.Automation.PSCredential ("{{ Domain }}\administrator", $password)
-          $sess = New-PSSession -ComputerName {{ inventory_hostname }} -credential $creds
-          Invoke-Command -Session $sess -scriptblock { $dir = "C:\PublicVault"}
-          Invoke-Command -Session $sess -scriptblock { $Acl = Get-Acl -Path "$dir"}
-          Invoke-Command -Session $sess -scriptblock { $identity = '{{ Domain }}\{{ Groups | random }}'}
-          Invoke-Command -Session $sess -scriptblock { $rights = 'FullControl'}
-          Invoke-Command -Session $sess -scriptblock { $inheritance = 'ContainerInherit, ObjectInherit'}
-          Invoke-Command -Session $sess -scriptblock { $propagation = 'None'}
-          Invoke-Command -Session $sess -scriptblock { $type = 'Allow'}
-          Invoke-Command -Session $sess -scriptblock { $ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)}
-          Invoke-Command -Session $sess -scriptblock { $Acl.AddAccessRule($ACE)}
-          Invoke-Command -Session $sess -scriptblock { Set-Acl -Path "$dir" -AclObject $Acl}
+          $dir = "C:\PublicVault"
+          $Acl = Get-Acl -Path "$dir"
+          $identity = '{{ Domain }}\{{ Groups | random }}'
+          $rights = 'FullControl'
+          $inheritance = 'ContainerInherit, ObjectInherit'
+          $propagation = 'None'
+          $type = 'Allow'
+          $ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)
+          $Acl.AddAccessRule($ACE)
+          Set-Acl -Path "$dir" -AclObject $Acl
+  become: yes
+  become_method: runas  
 
 - name: Powershell - Change access rights on SecretVault
   ansible.windows.win_powershell:
     script: |
-          $password = ConvertTo-SecureString "Passw0rd!" -AsPlainText -Force
-          $creds = New-Object System.Management.Automation.PSCredential ("{{ Domain }}\administrator", $password)
-          $sess = New-PSSession -ComputerName {{ inventory_hostname }} -credential $creds
-          Invoke-Command -Session $sess -scriptblock { $dir = "C:\SecretVault"}
-          Invoke-Command -Session $sess -scriptblock { $Acl = Get-Acl -Path "$dir"}
-          Invoke-Command -Session $sess -scriptblock { $identity = '{{ Domain }}\{{ Groups | random }}'}
-          Invoke-Command -Session $sess -scriptblock { $rights = 'FullControl'}
-          Invoke-Command -Session $sess -scriptblock { $inheritance = 'ContainerInherit, ObjectInherit'}
-          Invoke-Command -Session $sess -scriptblock { $propagation = 'None'}
-          Invoke-Command -Session $sess -scriptblock { $type = 'Allow'}
-          Invoke-Command -Session $sess -scriptblock { $ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)}
-          Invoke-Command -Session $sess -scriptblock { $Acl.AddAccessRule($ACE)}
-          Invoke-Command -Session $sess -scriptblock { Set-Acl -Path "$dir" -AclObject $Acl}
+          $dir = "C:\SecretVault"
+          $Acl = Get-Acl -Path "$dir"
+          $identity = '{{ Domain }}\{{ Groups | random }}'
+          $rights = 'FullControl'
+          $inheritance = 'ContainerInherit, ObjectInherit'
+          $propagation = 'None'
+          $type = 'Allow'
+          $ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)
+          $Acl.AddAccessRule($ACE)
+          Set-Acl -Path "$dir" -AclObject $Acl
+  become: yes
+  become_method: runas  

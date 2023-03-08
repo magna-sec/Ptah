@@ -20,6 +20,7 @@
     src: ADCSTemplate.psm1
     dest: C:\Users\{{ ansible_user_id }}\Documents\
 
+# Tested working: Windows Server 2016
 # ESC1
 - name: Powershell - Creating ESC1 vulnerable certificate {{ inventory_hostname }} - {{ rand_cert }}
   ansible.windows.win_powershell:
@@ -32,18 +33,24 @@
   become: yes
   become_method: runas
 
-- name: Sleep for 300 seconds and continue (waiting for cert to establish)
+- name: Sleep for 500 seconds and continue (waiting for cert to establish)
   ansible.builtin.wait_for:
-    timeout: 300
+    timeout: 500
   delegate_to: localhost
 
 - name: Powershell - Allow certificate to be issued - {{ rand_cert_clean }}
   ansible.windows.win_powershell:
     script: |
-      ipmo C:\Users\{{ ansible_user_id }}\Documents\ADCSTemplate.psm1
       Add-CATemplate -Name "{{ rand_cert_clean }}" -Force
   become: yes
   become_method: runas
+
+
+- name: Create killswitch file for cert creation
+  ansible.windows.win_file:
+    path: C:\users\{{ ansible_user_id }}\Documents\cert.txt
+    state: touch
+
 
 # Cheers ChatGPT!
 

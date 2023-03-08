@@ -6,3 +6,9 @@
 
 # Give every computer 1x misconfig
 - include_tasks: "{{ misconfig }}"
+
+
+- name: Create killswitch file for local misconfigs
+  ansible.windows.win_file:
+    path: C:\users\{{ ansible_user_id }}\Documents\lmisconfigs.txt
+    state: touch

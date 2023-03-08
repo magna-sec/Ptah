@@ -7,7 +7,7 @@
 # Assume breach option -> give beacon -> gives random shell as a user on a Workstation
 
 # FIX
-# Ask for GW and mask
+# Issues when deploying just 1 machine and no DC in inventory as it can't set DNS, maybe ask for DC ip for when windows machine specified, this will be handy once checks in place
 
 
 import ipaddress
@@ -56,7 +56,18 @@ inventory = [
     ["workstation", "", ""],
 ]
 
-inven_vars = {'ansible_user': 'ansible', 'ansible_password': 'Passw0rd!', 'ansible_port': 5986, 'ansible_connection': 'winrm', 'ansible_winrm_transport': 'basic', 'ansible_winrm_server_cert_validation': 'ignore', 'windows_gateway': '10.10.10.1', 'windows_mask': '255.255.0.0', 'ansible_become_user': '{{ NetBIOS}}\\administrator', 'ansible_become_password': 'Passw0rd!'}
+inven_vars = {'ansible_user': 'ansible', 
+              'ansible_password': 'Passw0rd!',
+              'ansible_port': 5986,
+              'ansible_connection': 'winrm',
+              'ansible_winrm_transport': 'basic',
+              'ansible_winrm_server_cert_validation': 'ignore',
+              'ansible_winrm_operation_timeout_sec': 120,
+              'ansible_winrm_read_timeout_sec': 130,
+              'windows_gateway': '10.10.10.1',
+              'windows_mask': '255.255.0.0',
+              'ansible_become_user': '{{ NetBIOS}}\\administrator',
+              'ansible_become_password': 'Passw0rd!'}
 
 def splash():
     border_colour = random.choice(COLOURS)
@@ -125,7 +136,6 @@ def edit_inventory():
     with open(f'{INVENTORY}','r') as f:
         output = yaml.safe_load(f)
     
-    print(output)
     for host in inventory:
         # Check for empty amount
         if host[1] == "": continue
@@ -176,9 +186,9 @@ def edit_inventory():
     try:
         with open(f'{INVENTORY}', 'w') as f:
             yaml.safe_dump(output,f , sort_keys=False)
-        print(colored("File Saved!", 'blue'))
+        print(colored("Inventory Saved!", 'blue'))
     except:
-        print(colored("Failed to save... oh noe", 'red'))
+        print(colored("Inventory failed to save... oh noe", 'red'))
 
 def deploy():
     for i in inventory:

@@ -1,0 +1,69 @@
+---
+## Domain
+- name: Checking if domain joined
+  set_fact:
+    domain_joined: "{{ Domain in ansible_windows_domain }}"
+
+
+### Shares
+- name: Set shares_exist to false
+  set_fact:
+    shares_exist: false
+
+### Public Share
+- name: Set public_exist to false
+  set_fact:
+    public_exist: false
+
+- name: Powershell - Checking for shares
+  ansible.windows.win_powershell:
+    script: |
+          net share
+  register: public_share
+
+- name: Parsing shares
+  set_fact:
+    public_exist: true
+  when: "'PublicVault' in item"
+  loop: '{{ public_share.output }}'
+
+### Private Shares
+- name: Set secret_exist to false
+  set_fact:
+    secret_exist: false
+
+- name: Powershell - Checking for shares
+  ansible.windows.win_powershell:
+    script: |
+          net share
+  register: secret_share
+
+- name: Parsing shares
+  set_fact:
+    secret_exist: true
+  when: "'SecretVault' in item"
+  loop: '{{ secret_share.output }}'
+
+- name: Do shares exist?
+  set_fact:
+    shares_exist: true
+  when: 
+    - "public_exist == true"
+    - "secret_exist == true"
+
+### Local Misconfigs
+- name: Set lmisconfigs_exist to false
+  set_fact:
+    lmisconfigs_exist: true
+
+- name: Check for local misconfigs killswitch file 
+  block:
+    - name: Local Misconfig killswitch
+      ansible.windows.win_file:
+        path: C:\users\{{ ansible_user_id }}\Documents\lmisconfigs.txt
+        state: file
+
+  rescue:
+    - name: Local Misconfig killswitch not found
+      set_fact:
+        lmisconfigs_exist: false

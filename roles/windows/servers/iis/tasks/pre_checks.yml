@@ -1,0 +1,22 @@
+---
+## Domain
+- name: Checking if domain joined
+  set_fact:
+    domain_joined: "{{ Domain in ansible_windows_domain }}"
+
+### Local Misconfigs
+- name: Set lmisconfigs_exist to false
+  set_fact:
+    lmisconfigs_exist: true
+
+- name: Check for local misconfigs killswitch file 
+  block:
+    - name: Local Misconfig killswitch
+      ansible.windows.win_file:
+        path: C:\users\{{ ansible_user_id }}\Documents\lmisconfigs.txt
+        state: file
+
+  rescue:
+    - name: Local Misconfig killswitch not found
+      set_fact:
+        lmisconfigs_exist: false
