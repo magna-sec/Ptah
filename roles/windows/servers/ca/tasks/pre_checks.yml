@@ -6,52 +6,23 @@
 
 
 
-### Certificate Services feature
-# Have to use this cause there's powershell in ca.yml will work on this!
-- name: Set feature_exists to false
-  set_fact:
-    feature_exists: false
-
-- name: Powershell - Checking for feature
-  ansible.windows.win_powershell:
-    script: |
-          Get-WindowsFeature -name AD-Certificate
-  register: features
-
-#- name: Parsing features
-#  set_fact:
-#    feature_exists: true
-#  when: "'[X]' in item"
-#  loop: '{{ features }}'
-
-- name: Parsing features
-  set_fact:
-    huh: '{{ features | list }}'
-
-
-- name: print features
-  debug:
-    var: huh.result
-  
 
 ### Certificates Created
 # Tried doing with Get-CATemplate but trying to compare 2 lists if a pain... will come back to this
-- name: Set cert_exists to false
+- name: Setting cert_exists to false
+  set_fact:
+    cert_exists: false
+
+- name: Check if certificate template is present
+  win_shell: |
+    Get-CATemplate | select Name
+  register: template_info
+
+- name: Checking if cert exists
   set_fact:
     cert_exists: true
-
-- name: Check for local Cert killswitch file 
-  block:
-    - name: Local Cert killswitch
-      ansible.windows.win_file:
-        path: C:\users\{{ ansible_user_id }}\Documents\cert.txt
-        state: file
-
-  rescue:
-    - name: Local Cert killswitch not found
-      set_fact:
-        cert_exists: false
-
+  when: item in template_info.stdout_lines | join(",")
+  loop: "{{ Certs | regex_replace('\\s') }}"
 
 ### Local Misconfigs
 - name: Set lmisconfigs_exist to false

@@ -15,9 +15,7 @@ windows:
         dc01:
           ansible_host: 10.10.45.1
     iis:
-      hosts:
-        iis01:
-          ansible_host: 10.10.45.3
+      hosts: null
     cert:
       hosts:
         cert01:

@@ -5,7 +5,6 @@
   when: domain_joined == false
   
 - include_tasks: ca.yml
-  when: feature_exists == false
 
 - include_tasks: create_certs.yml
   when: cert_exists == false

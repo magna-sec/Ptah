@@ -4,8 +4,6 @@
   set_fact:
     domain_joined: "{{ Domain in ansible_windows_domain }}"
 
-
-
 ### Computers
 - name: Powershell - Check for {{ Computers | last }} AD Computer
   ansible.windows.win_powershell:
@@ -15,17 +13,22 @@
   register: computer
   become: yes
   become_method: runas  
+  when: domain_joined
 
 - name: Set computers_exist when {{ Computers | last }} exists
   block:
     - name: Checking for computer
       set_fact:
         computers_exist: true
-      when: "'Cannot' not in computer.output[0]"
+      when: 
+        - "'Cannot' not in computer.output[0]"
+        - domain_joined
+      
   rescue:
     - name: Computer not found
       set_fact:
         computers_exist: false
+        when: domain_joined
 
 ### Groups
 # community.windows.win_domain_group can't check for this
@@ -37,17 +40,21 @@
   register: group
   become: yes
   become_method: runas  
+  when: domain_joined
 
 - name: Set groups_exist when {{ Groups | last }} exists
   block:
     - name: Checking for group
       set_fact:
         groups_exist: true
-      when: "'Cannot' not in group.output[0]"
+      when: 
+        - "'Cannot' not in group.output[0]"
+        - domain_joined
   rescue:
     - name: Group not found
       set_fact:
         groups_exist: false
+        when: domain_joined
 
 
 ### Users
