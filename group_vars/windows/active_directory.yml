@@ -1,11 +1,8 @@
 Domain: earth.lab
-DN: "DC=earth,DC=lab"
+Domain_split: "{{ Domain.split('.') }}"
+NetBIOS: '{{ Domain_split[0] }}'
+DN: "DC={{ Domain_split|join(',DC=') }}"
 Group_OU: "OU=Groups,{{ DN }}"
-NetBIOS: "EARTH"
-
-
-#Domain_split: "{{ Domain.split('.') }}"
-#DN: DC={{ domain_split|join(',DC=') }}"
 
 Certs:
   - "{{ NetBIOS }} Domain Authentication"
