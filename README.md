@@ -50,3 +50,5 @@ Can currently deploy:
 - Change some of the PowerShell stuff to ansible (even though i tried that...)
 - Deploy logging/siem tools for blueteam esc stuff
 - Log random users in to create creds
+- Fix legit thrown errors <- look scary
+

@@ -11,6 +11,7 @@
   ansible.windows.win_powershell:
     script: |
       netsh interface ip set address Ethernet0 static {{ ansible_host }} {{ windows_mask }} {{ windows_gateway }}
+      netsh interface ipv4 set dns name="Ethernet" static 127.0.0.1 8.8.8.8
   ignore_unreachable: true
 
 - name: Reboot for hostname change

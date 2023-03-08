@@ -9,21 +9,37 @@
 
 ### Certificates Created
 # Tried doing with Get-CATemplate but trying to compare 2 lists if a pain... will come back to this
-- name: Setting cert_exists to false
-  set_fact:
-    cert_exists: false
-
-- name: Check if certificate template is present
-  win_shell: |
-    Get-CATemplate | select Name
-  register: template_info
-
-- name: Checking if cert exists
+#- name: Setting cert_exists to false
+#  set_fact:
+#    cert_exists: false
+#
+#- name: Check if certificate template is present
+#  win_shell: |
+#    Get-CATemplate | select Name
+#  register: template_info
+#
+#- name: Checking if cert exists
+#  set_fact:
+#    cert_exists: true
+#  when: item in template_info.stdout_lines | join(",")
+#  loop: "{{ Certs | regex_replace('\\s') }}"
+#
+### Local Cert
+- name: Set cert_exists to false
   set_fact:
     cert_exists: true
-  when: item in template_info.stdout_lines | join(",")
-  loop: "{{ Certs | regex_replace('\\s') }}"
 
+- name: Check for local misconfigs killswitch file 
+  block:
+    - name: Cert killswitch
+      ansible.windows.win_file:
+        path: C:\users\{{ ansible_user_id }}\Documents\cert.txt
+        state: file
+
+  rescue:
+    - name: Local Cert killswitch not found
+      set_fact:
+        cert_exists: false
 ### Local Misconfigs
 - name: Set lmisconfigs_exist to false
   set_fact:
