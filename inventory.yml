@@ -13,13 +13,13 @@ windows:
     dc:
       hosts:
         dc01:
-          ansible_host: 192.168.190.162
+          ansible_host: 10.10.45.1
     iis:
       hosts: null
     cert:
       hosts:
         cert01:
-          ansible_host: 192.168.190.163
+          ansible_host: 10.10.45.2
     fileserver:
       hosts: null
     workstation:
@@ -33,7 +33,7 @@ windows:
     ansible_winrm_server_cert_validation: ignore
     ansible_winrm_operation_timeout_sec: 120
     ansible_winrm_read_timeout_sec: 130
-    windows_gateway: 192.168.190.2
-    windows_mask: 255.255.255.0
+    windows_gateway: 10.10.10.1
+    windows_mask: 255.255.0.0
     ansible_become_user: '{{ NetBIOS}}\administrator'
     ansible_become_password: Passw0rd!

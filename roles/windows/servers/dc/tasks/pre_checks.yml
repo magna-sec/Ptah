@@ -5,105 +5,86 @@
     domain_joined: "{{ Domain in ansible_windows_domain }}"
 
 ### Computers
-- name: Powershell - Check for {{ Computers | last }} AD Computer
-  ansible.windows.win_powershell:
-    script: |
-          Import-Module ActiveDirectory
-          Get-ADComputer {{ Computers | last }}
-  register: computer
-  become: yes
-  become_method: runas  
-  when: domain_joined
-
-- name: Set computers_exist when {{ Computers | last }} exists
+- name: Check if computer account exists in Active Directory
   block:
-    - name: Checking for computer
-      set_fact:
+    - set_fact:
+        computers_exist: false
+    - set_fact:
+        last_comp: '{{ Computers | last }}'
+
+    - name: Check computers exist
+      win_shell: |
+        dsquery computer -name {{ last_comp }}
+      register: computer_account_result
+      ignore_errors: true
+
+    - set_fact:
         computers_exist: true
       when: 
-        - "'Cannot' not in computer.output[0]"
+        - last_comp in computer_account_result.stdout
         - domain_joined
-      
-  rescue:
-    - name: Computer not found
-      set_fact:
-        computers_exist: false
-        when: domain_joined
 
 ### Groups
 # community.windows.win_domain_group can't check for this
-- name: Powershell - Check for {{ Groups | last }} AD group
-  ansible.windows.win_powershell:
-    script: |
-          Import-Module ActiveDirectory
-          Get-ADGroup {{ Groups | last }}
-  register: group
-  become: yes
-  become_method: runas  
-  when: domain_joined
-
-- name: Set groups_exist when {{ Groups | last }} exists
+- name: Check if groups exists in Active Directory
   block:
-    - name: Checking for group
-      set_fact:
+    - set_fact:
+        groups_exist: false
+    - set_fact:
+        last_group: '{{ Groups | last }}'
+
+    - name: Check groups exist
+      win_shell: |
+        dsquery group -name {{ last_group }}
+      register: group_result
+      ignore_errors: true
+
+    - set_fact:
         groups_exist: true
       when: 
-        - "'Cannot' not in group.output[0]"
+        - last_group in group_result.stdout
         - domain_joined
-  rescue:
-    - name: Group not found
-      set_fact:
-        groups_exist: false
-        when: domain_joined
-
-
+  
 ### Users
-- name: Set users_exists to false
-  set_fact:
-    users_exist: false
+- name: Ensuring users are present
+  block:
+    - set_fact:
+        users_exist: false
+    - ansible.windows.win_user:
+        name: '{{ Usernames | last }}'
+        state: query
+      register: user
 
-- name: Ensure user {{ Usernames | last }} is present
-  ansible.windows.win_user:
-    name: '{{ Usernames | last }}'
-    state: query
-  register: user
-
-- name: set_fact when {{ Usernames | last }} in key
+- name: Set users_exist if users found
   set_fact:
     users_exist: true
   when: "'path' in item.key"
   loop: "{{ lookup('ansible.builtin.dict', user) }}"
 
 ### AD Misconfigs
-- name: Set misconfigs_exist to false
-  set_fact:
-    misconfigs_exist: true
+- name: Check for AD misconfigs killswitch file 
+  block: 
+  - set_fact:
+      misconfigs_exist: false
 
-- name: Check for misconfigs killswitch file 
-  block:
-    - name: Misconfig killswitch
-      ansible.windows.win_file:
-        path: C:\users\{{ ansible_user_id }}\Documents\misconfigs.txt
-        state: file
-
-  rescue:
-    - name: Misconfig killswitch not found
-      set_fact:
-        misconfigs_exist: false
+  - win_stat:
+      path: C:\users\{{ ansible_user_id }}\Documents\misconfigs.txt
+    register: file_info
+  
+  - set_fact:
+      misconfigs_exist: true
+    when: "file_info.stat.exists == true"
 
 ### Local Misconfigs
-- name: Set lmisconfigs_exist to false
-  set_fact:
-    lmisconfigs_exist: true
-
 - name: Check for local misconfigs killswitch file 
-  block:
-    - name: Local Misconfig killswitch
-      ansible.windows.win_file:
-        path: C:\users\{{ ansible_user_id }}\Documents\lmisconfigs.txt
-        state: file
+  block: 
+  - set_fact:
+      lmisconfigs_exist: false
 
-  rescue:
-    - name: Local Misconfig killswitch not found
-      set_fact:
-        lmisconfigs_exist: false
+  - win_stat:
+      path: C:\users\{{ ansible_user_id }}\Documents\lmisconfigs.txt
+    register: file_info
+  
+  - set_fact:
+      lmisconfigs_exist: true
+    when: "file_info.stat.exists == true"

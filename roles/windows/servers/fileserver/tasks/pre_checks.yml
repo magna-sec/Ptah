@@ -52,18 +52,15 @@
     - "secret_exist == true"
 
 ### Local Misconfigs
-- name: Set lmisconfigs_exist to false
-  set_fact:
-    lmisconfigs_exist: true
-
 - name: Check for local misconfigs killswitch file 
-  block:
-    - name: Local Misconfig killswitch
-      ansible.windows.win_file:
-        path: C:\users\{{ ansible_user_id }}\Documents\lmisconfigs.txt
-        state: file
+  block: 
+  - set_fact:
+      lmisconfigs_exist: false
 
-  rescue:
-    - name: Local Misconfig killswitch not found
-      set_fact:
-        lmisconfigs_exist: false
+  - win_stat:
+      path: C:\users\{{ ansible_user_id }}\Documents\lmisconfigs.txt
+    register: file_info
+  
+  - set_fact:
+      lmisconfigs_exist: true
+    when: "file_info.stat.exists == true"
