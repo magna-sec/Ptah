@@ -22,6 +22,8 @@ User member of GroupA -> GroupA has control over groupB -> GroupB is part of the
 
 Though of course this is totally randomly, so the possibilties are huge.
 
+Can also supply the attacker with a random beacon from a random workstation. This is to simulate a random member of staff executing malicious code.
+
 Can currently deploy:
 - Windows Active Directory
 - Active Directory misconfigs (random)
@@ -34,6 +36,7 @@ Can currently deploy:
     - User
     - Computer
     - Computer locally
+
 
 ## To Do:
 - Make more vulnerable certs
