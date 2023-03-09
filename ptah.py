@@ -11,8 +11,10 @@
 
 
 import ipaddress
+import validators
 import yaml
 import random
+import subprocess
 from termcolor import colored
 
 # Purely to hide that ugly CTRL+C output
@@ -38,9 +40,12 @@ PTAH = [
  ,"               ╚═╝        ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝"]
 
 MAIN = {"1":"Deploy", "2":"Assume Breach", "99":"Setup Help"}
-BREACH = {""}
+TYPES = {"1":"EXE", "2":"PS1"}
+YESNO = {"1":"Yes", "2":"No"}
 DIGITS = ["0","1","2","3","4","5","6","7","8","9"] # Sure theres a better way than this
 INVENTORY = "inventory.yml"
+BREACH_FILE = "roles/windows/breach/defaults/main.yml"
+BREACH_CMD = "ansible-playbook -i inventory.yml breach.yml"
 
 LINUX = ["attacker", "teamserver", "redirector"]
 WINDOWS = ["dc", "iis", "cert", "fileserver", "workstation"]
@@ -95,6 +100,16 @@ def validate_ip_address(ip_string):
             print(colored("Not a valid IP!", "red"))
             return False
 
+def validate_url(url):
+    validation = validators.url(url)
+    if url == "jim": return False
+    
+    if validation:
+        return True
+    else:
+        print(colored("Not a valid URL!", "red"))
+        return False
+
 def get_ips(amount):
     cursor = "IP -> "
     choice = "jim"
@@ -112,6 +127,15 @@ def get_ips(amount):
         ip = ""
 
     return concat_ips[:-1]
+
+def get_url():
+    cursor = "URL -> "
+    url = "jim"
+  
+    while not validate_url(url):
+        print(colored(cursor, 'yellow'), end = "")
+        url = input()
+    return url
 
 def clear_inventory():
     # Open file for reading
@@ -202,6 +226,41 @@ def deploy():
 
     edit_inventory()
 
+def breach():
+    # Load breach facts
+    with open(f'{BREACH_FILE}','r') as f:
+        output = yaml.safe_load(f)
+
+    # Ask for url
+    print(colored("Please supply beacon url:", 'green'))
+    url = get_url()
+    output['beacon_url'] = url
+
+    # Ask for beacon type
+    print(colored("Please supply beacon type:", 'green'))
+    b_type = print_menu(TYPES)
+    output['beacon_type'] = TYPES[b_type]
+
+
+    # Save breach facts
+    with open(f'{BREACH_FILE}', 'w') as f:
+        yaml.safe_dump(output,f , sort_keys=False)
+    
+    # Ask to breach
+    print(colored("Ready for a beacon?:", 'red'))
+    ans = print_menu(YESNO)
+    if(ans == "1"):
+        print(colored("ATTACKING PLEASE WAIT.....", 'red'))
+        process = subprocess.Popen(BREACH_CMD.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # Read the stdout and stderr streams
+        stdout, stderr = process.communicate()
+    if(ans == "2"):
+        print(colored("ok bye!", 'blue'))
+        return 0
+
+
+
+
 def print_menu(menu):
     for key in menu:
         tab = key + ": "
@@ -216,3 +275,4 @@ if __name__ == "__main__":
     splash()
     choice = print_menu(MAIN)
     if(choice == "1"): deploy()
+    if(choice == "2"): breach()

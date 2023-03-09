@@ -1,0 +1,6 @@
+pick_user: '{{ Usernames | random }}'
+pick_workstation: '{{ groups["workstation"] | map("extract", hostvars, ["inventory_hostname"])
+  | list | random }}'
+defender: false
+beacon_url: http://10.10.254.1/test.exe
+beacon_type: EXE

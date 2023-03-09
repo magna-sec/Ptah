@@ -1,4 +1,4 @@
-# C2 Ansible
+# Ptah
 <p align="center" title="Hi">  <img src="images/logo.png" /> </p>
 
 # ! WORK IN PROGRESS !
@@ -6,7 +6,7 @@
 I got bored of constantly installing/reinstalling tooling, redirectors, teamservers and AD networks. The dream would be to spin up around 3 Ubuntu machines, a few Windows machines and then let ansible do its thing and bam! A lab!
 
 ## Script:
-A script is included `create.py` to help you create your `inventory.yml` files for deployment. This is a very rough script and very much a work in progress.
+A script is included `ptah.py` to help you create your `inventory.yml` files for deployment. This is a very rough script and very much a work in progress.
 
 
 ## Current Abilities

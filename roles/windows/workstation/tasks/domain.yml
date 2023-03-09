@@ -18,6 +18,27 @@
       netsh interface ip set address Ethernet0 static {{ ansible_host }} {{ windows_mask }} {{ windows_gateway }}
   ignore_unreachable: true
 
+
+- name: Firewall rules to allow WinRM
+  community.windows.win_firewall_rule:
+    name: WinRM In
+    localport: 5985-5986
+    action: allow
+    direction: in
+    protocol: tcp
+    state: present
+    enabled: yes
+
+- name: Firewall rules to allow WinRM
+  community.windows.win_firewall_rule:
+    name: WinRM Out
+    localport: 5985-5986
+    action: allow
+    direction: out
+    protocol: tcp
+    state: present
+    enabled: yes
+
 - name: Reboot for hostname change
   win_reboot:
    pre_reboot_delay: 30

