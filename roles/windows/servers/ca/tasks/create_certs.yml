@@ -31,6 +31,7 @@
       Set-ADCSTemplateACL -DisplayName "{{ rand_cert }}" -AutoEnroll -Enroll -Identity "Authenticated Users"
       Add-CATemplate -Name "{{ rand_cert }}" -Force
   become: yes
+  become_user: '{{ NetBIOS }}\administrator'
   become_method: runas
 
 - name: Sleep for 500 seconds and continue (waiting for cert to establish)
@@ -43,6 +44,7 @@
     script: |
       Add-CATemplate -Name "{{ rand_cert_clean }}" -Force
   become: yes
+  become_user: '{{ NetBIOS }}\administrator'
   become_method: runas
 
 

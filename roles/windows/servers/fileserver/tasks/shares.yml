@@ -42,6 +42,7 @@
           $Acl.AddAccessRule($ACE)
           Set-Acl -Path "$dir" -AclObject $Acl
   become: yes
+  become_user: '{{ NetBIOS }}\administrator'
   become_method: runas  
 
 - name: Powershell - Change access rights on SecretVault
@@ -58,4 +59,5 @@
           $Acl.AddAccessRule($ACE)
           Set-Acl -Path "$dir" -AclObject $Acl
   become: yes
+  become_user: '{{ NetBIOS }}\administrator'
   become_method: runas  

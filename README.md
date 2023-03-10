@@ -3,13 +3,19 @@
 
 # ! WORK IN PROGRESS !
 ## Purpose:
-I got bored of constantly installing/reinstalling tooling, redirectors, teamservers and AD networks. The dream would be to spin up around 3 Ubuntu machines, a few Windows machines and then let ansible do its thing and bam! A lab!
+I got bored of constantly installing/reinstalling tooling, redirectors, teamservers and AD networks. `Ptah` aims to create any attacking infra you need and the ability to create a randomly misconfigured AD lab.
+
+`Ptah` is a "wrapper" around ansible, the script changes various facts (variables) in different files.
 
 ## Script:
-A script is included `ptah.py` to help you create your `inventory.yml` files for deployment. This is a very rough script and very much a work in progress.
+- Features:
+    - Alter your `inventory.yml`
+    - Create a breach, providing you with a beacon as a random user.
 
+This is a very rough script and very much a work in progress.
 
-## Current Abilities
+---
+# Current Abilities
 ## Linux:
 - Fill Ubuntu with decent tooling
 - Deploy Teamservers for CS/PoshC2/Sliver
@@ -18,15 +24,16 @@ A script is included `ptah.py` to help you create your `inventory.yml` files for
 
 ## Windows:
 The Windows Active Directory enviroment deploys randomly selected misconfigurations. This leads to interesting attack paths, for example:
-User member of GroupA -> GroupA has control over groupB -> GroupB is part of the DAs.
+
+**Bob member of GroupA -> GroupA has control over groupB -> GroupB is part of the DAs.**
 
 Though of course this is totally randomly, so the possibilties are huge.
 
-Can also supply the attacker with a random beacon from a random workstation. This is to simulate a random member of staff executing malicious code.
+`Ptah` is also able to supply the attacker with a beacon from a random workstation. This is to simulate a random member of staff being phished.
 
 Can currently deploy:
 - Windows Active Directory
-- Active Directory misconfigs (random)
+- Active Directory misconfigurations (random)
 - Windows 10 
 - IIS
 - ADCS - With ESC1 vulnerable certificate template
@@ -37,21 +44,30 @@ Can currently deploy:
     - Computer
     - Computer locally
 
-
+---
 ## To Do:
-- Make more vulnerable certs
-- Implement checks for most tasks in the main.ymls?
-- Finish off misconfigs
-- Speed up adding users/groups etc with forks.. I think?
-- PowerDNS... maybe?
-- Certbot for SSL
-- Auto domain name -> redirector
-- Optimise AD deployment .e.g not loop users 3? times
-- Future future add the ability to make a network behind a router/firewall
-- Add assume breach where you get a shell/beacon as a random user on a box
-- Implement hardening options: e.g. "Do u want Applocker" etc
-- Change some of the PowerShell stuff to ansible (even though i tried that...)
-- Deploy logging/siem tools for blueteam esc stuff
-- Log random users in to create creds
-- Fix legit thrown errors <- look scary
+- Machines:
+    - PowerDNS... maybe?
+    - Certbot for SSL
+- Features:
+    - Auto domain name -> redirector
+    - Deploy logging/siem tools for blueteam esc stuff
+    - Future future add the ability to make a network behind a router/firewall
+    - Implement hardening options: e.g. "Do u want Applocker" etc
+    - Make more vulnerable certs
+    - Finish off misconfigs
+    - Log random users in to create creds
+    - Create domain trusts
+    - Install Office.. somehow
+    - Install Exchange
+
+- Tidying:
+    - Optimise AD deployment .e.g not loop users 3? times
+    - Change some of the PowerShell stuff to ansible (even though i tried that...)
+    - Speed up adding users/groups etc with forks.. I think?
+
+
+
+
+
 

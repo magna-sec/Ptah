@@ -39,16 +39,24 @@ PTAH = [
  ,"               ██║        ██║   ██║  ██║██║  ██║"
  ,"               ╚═╝        ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝"]
 
+# Menus
 MAIN = {"1":"Deploy", "2":"Assume Breach", "99":"Setup Help"}
 TYPES = {"1":"EXE", "2":"PS1"}
 YESNO = {"1":"Yes", "2":"No"}
+
+# Checks
 DIGITS = ["0","1","2","3","4","5","6","7","8","9"] # Sure theres a better way than this
-INVENTORY = "inventory.yml"
-BREACH_FILE = "roles/windows/breach/defaults/main.yml"
+
+# Breach
+BREACH_FACTS = "roles/windows/breach/defaults/main.yml"
+BREACH_TASKS = "breach.yml"
 BREACH_CMD = "ansible-playbook -i inventory.yml breach.yml"
 
+# Inventory
+INVENTORY = "inventory.yml"
 LINUX = ["attacker", "teamserver", "redirector"]
 WINDOWS = ["dc", "iis", "cert", "fileserver", "workstation"]
+
 
 inventory = [
     ["attacker", "", ""],
@@ -71,7 +79,6 @@ inven_vars = {'ansible_user': 'ansible',
               'ansible_winrm_read_timeout_sec': 130,
               'windows_gateway': '10.10.10.1',
               'windows_mask': '255.255.0.0',
-              'ansible_become_user': '{{ NetBIOS}}\\administrator',
               'ansible_become_password': 'Passw0rd!'}
 
 def splash():
@@ -228,7 +235,7 @@ def deploy():
 
 def breach():
     # Load breach facts
-    with open(f'{BREACH_FILE}','r') as f:
+    with open(f'{BREACH_FACTS}','r') as f:
         output = yaml.safe_load(f)
 
     # Ask for url
@@ -241,23 +248,46 @@ def breach():
     b_type = print_menu(TYPES)
     output['beacon_type'] = TYPES[b_type]
 
+    # Pick random workstation
+    workstations = []
+    # Load inventory file
+    with open(f'{INVENTORY}','r') as f:
+        inven = yaml.safe_load(f)
+
+    # Get all available workstations
+    work_hosts = inven["windows"]["children"]["workstation"]["hosts"]
+    for h in work_hosts:
+        workstations.append(h)
+
+    # Pick random workstation
+    rand_workstation = random.choice(workstations)
+
+    # Load breach tasks file
+    with open(f'{BREACH_TASKS}','r') as f:
+        tasks = yaml.safe_load(f)
+
+    tasks[0]["hosts"] = rand_workstation
+
+    # Save breach tasks
+    with open(f'{BREACH_TASKS}', 'w') as f:
+        yaml.safe_dump(tasks,f , sort_keys=False)
+
 
     # Save breach facts
-    with open(f'{BREACH_FILE}', 'w') as f:
+    with open(f'{BREACH_FACTS}', 'w') as f:
         yaml.safe_dump(output,f , sort_keys=False)
     
     # Ask to breach
     print(colored("Ready for a beacon?:", 'red'))
     ans = print_menu(YESNO)
     if(ans == "1"):
-        print(colored("ATTACKING PLEASE WAIT.....", 'red'))
+        print(colored(f"Attacking: { rand_workstation }\nPLEASE WAIT.....", 'red'))
         process = subprocess.Popen(BREACH_CMD.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # Read the stdout and stderr streams
         stdout, stderr = process.communicate()
     if(ans == "2"):
         print(colored("ok bye!", 'blue'))
         return 0
-
 
 def print_menu(menu):
     for key in menu:

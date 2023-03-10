@@ -1,5 +1,3 @@
----
-# DC -> WinRM as random user
-- hosts: dc
+- hosts: workstation02
   roles:
-    - windows/breach
+  - windows/breach
