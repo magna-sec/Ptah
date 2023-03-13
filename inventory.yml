@@ -28,8 +28,6 @@ windows:
       hosts:
         workstation01:
           ansible_host: 10.10.45.10
-        workstation02:
-          ansible_host: 10.10.45.11
   vars:
     ansible_user: ansible
     ansible_password: Passw0rd!

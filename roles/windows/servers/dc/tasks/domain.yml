@@ -12,7 +12,18 @@
     script: |
       netsh interface ip set address Ethernet0 static {{ ansible_host }} {{ windows_mask }} {{ windows_gateway }}
       netsh interface ipv4 set dns name="Ethernet" static 127.0.0.1 8.8.8.8
-  ignore_unreachable: true
+  async: 100 # Using "fire and forget"
+  poll: 0
+
+- name: Wait for hosts network
+  local_action:
+    module: wait_for
+    host: "{{ ansible_host }}"
+    port: 5986
+    delay: 10
+    state: started
+  register: wait_result
+
 
 - name: Reboot for hostname change
   win_reboot:
