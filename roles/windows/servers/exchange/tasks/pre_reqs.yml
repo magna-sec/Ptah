@@ -1,0 +1,33 @@
+---
+# https://github.com/jborean93/exchange-test-environment/blob/master/roles/exchange/tasks/main.yml
+- name: Installing {{ Exchange_Features | length }} Windows features
+  win_feature:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ Exchange_Features }}"
+  register: win_feature
+
+
+- name: install .NET 4.8 and Visual C++ 2013 redistributable
+  win_chocolatey:
+    name:
+    - netfx-4.8
+    - vcredist2013
+    state: present
+  register: pri_exchange_choco_install
+
+- name: reboot after installing .NET 4.8 and Visual C++ 2013 redistributable
+  win_reboot:
+  when: pri_exchange_choco_install is changed
+
+- name: install Unified Communications Managed API 4.0 Runtime
+  win_package:
+    path: https://download.microsoft.com/download/2/C/4/2C47A5C1-A1F3-4843-B9FE-84C0032C61EC/UcmaRuntimeSetup.exe
+    arguments: /q /norestart
+    product_id: UCMA4
+    state: present
+  register: pri_exchange_ucma_install
+
+- name: reboot after installing Unified Communications Managed API 4.0 Runtime
+  win_reboot:
+  when: pri_exchange_ucma_install.reboot_required

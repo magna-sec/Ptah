@@ -55,7 +55,7 @@ BREACH_CMD = "ansible-playbook -i inventory.yml breach.yml"
 # Inventory
 INVENTORY = "inventory.yml"
 LINUX = ["attacker", "teamserver", "redirector"]
-WINDOWS = ["dc", "iis", "cert", "fileserver", "workstation"]
+WINDOWS = ["dc", "exchange", "iis", "cert", "fileserver", "workstation"]
 
 
 inventory = [
@@ -63,6 +63,7 @@ inventory = [
     ["teamserver", "", ""],
     ["redirector", "", ""],
     ["dc", "", ""],
+    ["exchange", "", ""],
     ["iis", "", ""],
     ["cert","", ""],
     ["fileserver","", ""],
@@ -218,6 +219,7 @@ def edit_inventory():
         with open(f'{INVENTORY}', 'w') as f:
             yaml.safe_dump(output,f , sort_keys=False)
         print(colored("Inventory Saved!", 'blue'))
+        print(colored("Run please: ansible-playbook -i inventory.yml deploy.yml", 'blue'))
     except:
         print(colored("Inventory failed to save... oh noe", 'red'))
 

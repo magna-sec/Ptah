@@ -1,0 +1,7 @@
+#- include_tasks: pre_checks.yml
+
+#- include_tasks: domain.yml
+#  when: domain_joined == false
+
+#- include_tasks: pre_reqs.yml
+- include_tasks: exchange.yml

@@ -13,9 +13,13 @@
     - redirector
 
 ######## WINDOWS
-- hosts: dc
+#- hosts: dc
+#  roles:
+#    - windows/servers/dc
+
+- hosts: exchange
   roles:
-    - windows/servers/dc
+    - windows/servers/exchange
 
 - hosts: iis
   roles:

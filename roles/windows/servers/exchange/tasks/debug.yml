@@ -1,0 +1,6 @@
+- name: Prints two lines of messages, but only if there is an environment value set
+  ansible.builtin.debug:
+    msg:
+    - "{{ exchange_version }}"
+    - "{{ (exchange_version | int == 2019) | ternary('_DiagnosticDataOFF', '') }}"
+    - "{{ (exchange_version | int == 2013) | ternary('ClientAccess,', '') }}"

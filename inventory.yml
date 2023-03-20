@@ -14,24 +14,22 @@ windows:
       hosts:
         dc01:
           ansible_host: 10.10.45.1
+    exchange:
+      hosts:
+        exchange01:
+          ansible_host: 10.10.45.2
     iis:
       hosts: null
     cert:
-      hosts:
-        cert01:
-          ansible_host: 10.10.45.2
+      hosts: null
     fileserver:
-      hosts:
-        fileserver01:
-          ansible_host: 10.10.45.3
+      hosts: null
     workstation:
-      hosts:
-        workstation01:
-          ansible_host: 10.10.45.10
+      hosts: null
   vars:
     ansible_user: ansible
     ansible_password: Passw0rd!
-    ansible_port: 5986
+    ansible_winrm_port: 5986
     ansible_connection: winrm
     ansible_winrm_transport: basic
     ansible_winrm_server_cert_validation: ignore

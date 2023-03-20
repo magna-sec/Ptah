@@ -7,7 +7,7 @@
     name: "{{ inventory_hostname }}"
 
 # Set static IP
-- name: Powershell - Set static IP address - THIS WILL FAIL, IT IS NORMAL
+- name: Powershell - Set static IP address
   ansible.windows.win_powershell:
     script: |
       netsh interface ip set address Ethernet0 static {{ ansible_host }} {{ windows_mask }} {{ windows_gateway }}
