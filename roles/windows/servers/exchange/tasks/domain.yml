@@ -1,4 +1,5 @@
 ---
+# https://docs.ansible.com/ansible/latest/collections/ansible/windows/win_feature_module.html
 # Change hostname
 - name: Change the hostname {{ inventory_hostname }}
   ansible.windows.win_hostname:
@@ -29,17 +30,9 @@
   register: wait_result
 
 - name: Reboot for hostname change
-  win_reboot:
-   reboot_timeout: 3600
+  ansible.windows.win_reboot:
+    reboot_timeout: 3600
 
-# This is needed otherwise workstations throw "Re-using the account was blocked by security policy occurs."
-# https://michlstechblog.info/blog/windows-unable-to-join-domain-re-using-the-account-was-blocked-by-security-policy/
-- name: Powershell - Add NetJoinLegacyAccountReuse due to errors joining domain
-  ansible.windows.win_powershell:
-    script: | 
-      Reg add HKLM\System\CurrentControlSet\Control\Lsa /v NetJoinLegacyAccountReuse /t REG_DWORD /d 1 /f
-
-# https://docs.ansible.com/ansible/latest/collections/ansible/windows/win_domain_membership_module.html
 - name: Joining {{ inventory_hostname }} to {{ Domain }}
   ansible.windows.win_domain_membership:
     dns_domain_name: "{{ Domain }}"
@@ -51,8 +44,3 @@
 - ansible.windows.win_reboot:
     reboot_timeout: 3600
   when: domain_state.reboot_required
-
-- name: Powershell - Remove NetJoinLegacyAccountReuse having now joined the domain
-  ansible.windows.win_powershell:
-    script: |
-      Reg delete HKLM\System\CurrentControlSet\Control\Lsa /v NetJoinLegacyAccountReuse /f

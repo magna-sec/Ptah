@@ -17,6 +17,10 @@
   roles:
     - windows/servers/dc
 
+- hosts: exchange
+  roles:
+    - windows/servers/exchange
+
 - hosts: iis
   roles:
     - windows/servers/iis

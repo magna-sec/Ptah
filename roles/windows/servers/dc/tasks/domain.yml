@@ -7,7 +7,7 @@
     name: "{{ inventory_hostname }}"
 
 # Set static IP
-- name: Powershell - Set static IP address - THIS WILL FAIL, IT IS NORMAL
+- name: Powershell - Set static IP address
   ansible.windows.win_powershell:
     script: |
       netsh interface ip set address Ethernet0 static {{ ansible_host }} {{ windows_mask }} {{ windows_gateway }}
@@ -27,7 +27,7 @@
 
 - name: Reboot for hostname change
   win_reboot:
-   pre_reboot_delay: 15
+   reboot_timeout: 3600
 
 - name: Install Active Directory
   ansible.windows.win_feature:
@@ -43,7 +43,7 @@
 
 - name: New Domain creation reboot
   win_reboot:
-   pre_reboot_delay: 15
+   reboot_timeout: 3600
 
 - name: Ensure a server is a domain controller
   ansible.windows.win_domain_controller:

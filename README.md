@@ -32,12 +32,13 @@ Though of course this is totally randomly, so the possibilties are huge.
 `Ptah` is also able to supply the attacker with a beacon from a random workstation. This is to simulate a random member of staff being phished.
 
 Can currently deploy:
-- Windows Active Directory
-- Active Directory misconfigurations (random)
-- Windows 10 
+- Windows Active Directory (DC)
+- Exchange 2016
 - IIS
 - ADCS - With ESC1 vulnerable certificate template
 - Fileserver
+- Windows 10 
+- Active Directory misconfigurations (random)
 - 1x Misconfig for each:
     - Group
     - User
@@ -59,12 +60,13 @@ Can currently deploy:
     - Log random users in to create creds
     - Create domain trusts
     - Install Office.. somehow
-    - Install Exchange
+    - Password Filter DLL Installed for local priv esc
+    - Instead of installing AD etc, wipe current misconfigs/users and re-do, saves building etc.
 
 - Tidying:
     - Optimise AD deployment .e.g not loop users 3? times
     - Change some of the PowerShell stuff to ansible (even though i tried that...)
-    - Speed up adding users/groups etc with forks.. I think?
+    - Speed up adding users/groups etc
 
 
 

@@ -14,20 +14,18 @@ windows:
       hosts:
         dc01:
           ansible_host: 10.10.45.1
+    exchange:
+      hosts:
+        exchange01:
+          ansible_host: 10.10.45.2
     iis:
       hosts: null
     cert:
-      hosts:
-        cert01:
-          ansible_host: 10.10.45.2
+      hosts: null
     fileserver:
-      hosts:
-        fileserver01:
-          ansible_host: 10.10.45.3
+      hosts: null
     workstation:
-      hosts:
-        workstation01:
-          ansible_host: 10.10.45.10
+      hosts: null
   vars:
     ansible_user: ansible
     ansible_password: Passw0rd!
@@ -40,3 +38,4 @@ windows:
     windows_gateway: 10.10.10.1
     windows_mask: 255.255.0.0
     ansible_become_password: Passw0rd!
+    callbacks_enabled: profile_tasks

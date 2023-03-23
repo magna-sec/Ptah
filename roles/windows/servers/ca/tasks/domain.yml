@@ -13,7 +13,7 @@
     - "{{ groups['dc'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
 
 # Set static IP
-- name: Powershell - Set static IP address - THIS WILL FAIL, IT IS NORMAL
+- name: Powershell - Set static IP address
   ansible.windows.win_powershell:
     script: |
       netsh interface ip set address Ethernet0 static {{ ansible_host }} {{ windows_mask }} {{ windows_gateway }}
@@ -42,4 +42,5 @@
   register: domain_state
 
 - ansible.windows.win_reboot:
+    reboot_timeout: 3600
   when: domain_state.reboot_required
