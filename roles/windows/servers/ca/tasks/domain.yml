@@ -42,4 +42,5 @@
   register: domain_state
 
 - ansible.windows.win_reboot:
+    reboot_timeout: 3600
   when: domain_state.reboot_required

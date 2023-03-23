@@ -31,7 +31,7 @@
 
 - name: Reboot for hostname change
   win_reboot:
-   pre_reboot_delay: 15
+   reboot_timeout: 3600
 
 - name: Joining {{ inventory_hostname }} to {{ Domain }}
   ansible.windows.win_domain_membership:
@@ -42,4 +42,5 @@
   register: domain_state
 
 - ansible.windows.win_reboot:
+    reboot_timeout: 3600
   when: domain_state.reboot_required

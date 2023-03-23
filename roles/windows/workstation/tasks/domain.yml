@@ -30,7 +30,7 @@
 
 - name: Reboot for hostname change
   win_reboot:
-   pre_reboot_delay: 30
+   reboot_timeout: 3600
 
 # This is needed otherwise workstations throw "Re-using the account was blocked by security policy occurs."
 # https://michlstechblog.info/blog/windows-unable-to-join-domain-re-using-the-account-was-blocked-by-security-policy/
@@ -49,6 +49,7 @@
   register: domain_state
 
 - ansible.windows.win_reboot:
+    reboot_timeout: 3600
   when: domain_state.reboot_required
 
 - name: Powershell - Remove NetJoinLegacyAccountReuse having now joined the domain

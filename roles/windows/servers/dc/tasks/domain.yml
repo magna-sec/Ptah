@@ -27,7 +27,7 @@
 
 - name: Reboot for hostname change
   win_reboot:
-   pre_reboot_delay: 15
+   reboot_timeout: 3600
 
 - name: Install Active Directory
   ansible.windows.win_feature:
@@ -43,7 +43,7 @@
 
 - name: New Domain creation reboot
   win_reboot:
-   pre_reboot_delay: 15
+   reboot_timeout: 3600
 
 - name: Ensure a server is a domain controller
   ansible.windows.win_domain_controller:

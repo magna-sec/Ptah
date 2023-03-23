@@ -1,9 +1,4 @@
 ---
-#- name: Copy ISO to C:\ - (This may take some time)
-#  ansible.windows.win_copy:
-#    src: exchangeserver2016.iso
-#    dest: C:\
-
 - name: Ensure an ISO is mounted 
   community.windows.win_disk_image:
     image_path: C:\exchangeserver2016.iso
@@ -14,7 +9,7 @@
   set_fact:
     exchange_setup: "{{ disk_image_out.mount_paths[0] }}setup.exe"
 
-- name: Install Exchange on {{ inventory_hostname }} - (This will take a long time(like over an hour probably(i forgot to time mine)))
+- name: Install Exchange on {{ inventory_hostname }} - (This will take a long time(like ~1.5 hours))
   win_package:
     path: "{{ exchange_setup }}"
     arguments: >-
@@ -29,6 +24,7 @@
   become_user: '{{ NetBIOS }}\administrator'
   become_method: runas  
 
-- name: reboot after installing Exchange
+- name: Reboot Exchange Install
   win_reboot:
-  when: pri_exchange_install is changed
+   reboot_timeout: 3600
+  ignore_errors: true

@@ -15,6 +15,7 @@ import validators
 import yaml
 import random
 import subprocess
+import urllib.request
 from termcolor import colored
 
 # Purely to hide that ugly CTRL+C output
@@ -57,6 +58,8 @@ INVENTORY = "inventory.yml"
 LINUX = ["attacker", "teamserver", "redirector"]
 WINDOWS = ["dc", "exchange", "iis", "cert", "fileserver", "workstation"]
 
+# ISOS
+EX2016 = "roles/windows/servers/exchange/files/exchangeserver2016.iso"
 
 inventory = [
     ["attacker", "", ""],
@@ -117,6 +120,24 @@ def validate_url(url):
     else:
         print(colored("Not a valid URL!", "red"))
         return False
+
+def get_exchange():
+    try:
+        with open(EX2016, 'r') as f:
+            print(colored("Exchange 2016 ISO found, SMASHING!", 'blue'))
+
+    except IOError:
+        print(colored("Exchange 2016 ISO not found, BOGUS!", 'red'))
+        print(colored("Wish to download Exchange 2016 ISO:", 'green'))
+        ans = print_menu(YESNO)
+        if(ans == "1"):
+            print(colored("Downloading ~5.6GiB Please Wait!... ", 'blue'))
+            urllib.request.urlretrieve('https://download.microsoft.com/download/2/5/8/258D30CF-CA4C-433A-A618-FB7E6BCC4EEE/ExchangeServer2016-x64-cu12.iso', EX2016)
+            print(colored("Download Complete :)", 'blue'))
+        if(ans == "2"):
+            print(colored("Come back when you've got the ISO buddy!", 'red'))
+            quit()
+
 
 def get_ips(amount):
     cursor = "IP -> "
@@ -219,7 +240,8 @@ def edit_inventory():
         with open(f'{INVENTORY}', 'w') as f:
             yaml.safe_dump(output,f , sort_keys=False)
         print(colored("Inventory Saved!", 'blue'))
-        print(colored("Run please: ansible-playbook -i inventory.yml deploy.yml", 'blue'))
+        print(colored("Please Run: ", 'blue'), end = '')
+        print(colored("ansible-playbook -i inventory.yml deploy.yml", 'green'))
     except:
         print(colored("Inventory failed to save... oh noe", 'red'))
 
@@ -232,6 +254,9 @@ def deploy():
 
         i[1] = choice
         i[2] = get_ips(i[1])
+
+        if(i[0] == "exchange"):
+            get_exchange()
 
     edit_inventory()
 

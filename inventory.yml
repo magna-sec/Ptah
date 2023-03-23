@@ -29,7 +29,7 @@ windows:
   vars:
     ansible_user: ansible
     ansible_password: Passw0rd!
-    ansible_winrm_port: 5986
+    ansible_port: 5986
     ansible_connection: winrm
     ansible_winrm_transport: basic
     ansible_winrm_server_cert_validation: ignore
@@ -38,3 +38,4 @@ windows:
     windows_gateway: 10.10.10.1
     windows_mask: 255.255.0.0
     ansible_become_password: Passw0rd!
+    callbacks_enabled: profile_tasks

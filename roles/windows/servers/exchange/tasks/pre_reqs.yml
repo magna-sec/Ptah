@@ -16,8 +16,9 @@
     state: present
   register: pri_exchange_choco_install
 
-- name: reboot after installing .NET 4.8 and Visual C++ 2013 redistributable
+- name: Reboot after installing .NET 4.8 and Visual C++ 2013 redistributable
   win_reboot:
+    reboot_timeout: 3600
   when: pri_exchange_choco_install is changed
 
 - name: install Unified Communications Managed API 4.0 Runtime
@@ -28,6 +29,6 @@
     state: present
   register: pri_exchange_ucma_install
 
-- name: reboot after installing Unified Communications Managed API 4.0 Runtime
+- name: Reboot after installing Unified Communications Managed API 4.0 Runtime
   win_reboot:
-  when: pri_exchange_ucma_install.reboot_required
+   reboot_timeout: 3600
