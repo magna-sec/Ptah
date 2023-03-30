@@ -2,7 +2,9 @@ linux:
   hosts: null
   children:
     attacker:
-      hosts: null
+      hosts:
+        attacker01:
+          ansible_host: 192.168.190.166
     teamserver:
       hosts: null
     redirector:
@@ -11,13 +13,9 @@ windows:
   hosts: null
   children:
     dc:
-      hosts:
-        dc01:
-          ansible_host: 10.10.45.1
+      hosts: null
     exchange:
-      hosts:
-        exchange01:
-          ansible_host: 10.10.45.2
+      hosts: null
     iis:
       hosts: null
     cert:

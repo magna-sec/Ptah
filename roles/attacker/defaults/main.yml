@@ -60,6 +60,7 @@ InitialPackages:
  - ca-certificates
  - gnupg
  - lsb-release
+ - checksec
 
 InitialDirs:
  - "/home/{{ ansible_user_id }}/ctfs"

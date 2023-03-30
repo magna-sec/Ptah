@@ -8,6 +8,10 @@
 
 # FIX
 # Issues when deploying just 1 machine and no DC in inventory as it can't set DNS, maybe ask for DC ip for when windows machine specified, this will be handy once checks in place
+# Fix various Linux bugs, no budgie prompt, give correct linux command
+# Checks for ISOs when 0 machines, remove this
+# maybe ask to pull pfp too?
+
 
 
 import ipaddress
