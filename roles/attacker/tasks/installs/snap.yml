@@ -1,8 +1,16 @@
 ---
 - name: Installing various snap packages
-  community.general.snap:
+  snap:
     name: "{{ item }}"
     classic: true
   become: true
   become_user: root
   loop: "{{ SnapInstalls }}"
+
+- name: Installing go version 1.19/stable (Issues with Ligolo-ng)
+  snap:
+    name: go
+    classic: true
+    channel: 1.19/stable
+  become: true
+  become_user: root

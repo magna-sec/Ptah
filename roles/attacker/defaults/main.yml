@@ -94,7 +94,6 @@ SnapInstalls:
  - crackmapexec
  - impacket
  - enum4linux
- - go
 
 GemInstalls:
  - wpscan

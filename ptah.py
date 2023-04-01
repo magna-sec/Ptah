@@ -259,7 +259,7 @@ def deploy():
         i[1] = choice
         i[2] = get_ips(i[1])
 
-        if(i[0] == "exchange"):
+        if(i[0] == "exchange" and i[2] != ""):
             get_exchange()
 
     edit_inventory()
