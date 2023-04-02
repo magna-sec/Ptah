@@ -52,7 +52,7 @@
     repo: https://github.com/trustedsec/CS-Remote-OPs-BOF
     dest: "{{ Bofs }}/CS-Remote-OPs"
     single_branch: yes
-    version: master
+    version: main
   when: bof_path.stat.exists == false
 
 ############## ajpc500-BOFs
@@ -66,7 +66,7 @@
     repo: https://github.com/ajpc500/BOFs
     dest: "{{ Bofs }}/Ajpc500"
     single_branch: yes
-    version: master
+    version: main
   when: bof_path.stat.exists == false
 
 ############## ServiceMove-BOF
@@ -80,7 +80,7 @@
     repo: https://github.com/netero1010/ServiceMove-BOF
     dest: "{{ Bofs }}/ServiceMove"
     single_branch: yes
-    version: master
+    version: main
   when: bof_path.stat.exists == false
 
 ############## Yaxser-Bof

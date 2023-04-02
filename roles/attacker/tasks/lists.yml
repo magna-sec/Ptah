@@ -20,9 +20,8 @@
     path: "{{ Lists }}/rockyou.txt"
   register: rockyou_path
 
-- name: Download Rockyou
-  ansible.builtin.unarchive:
-    src: https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt
+- name: Downloading Rockyou
+  ansible.builtin.get_url:
+    url: https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt
     dest: "{{ Lists }}/rockyou.txt"
-    remote_src: yes
   when: rockyou_path.stat.exists == false
