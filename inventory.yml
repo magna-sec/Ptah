@@ -2,9 +2,7 @@ linux:
   hosts: null
   children:
     attacker:
-      hosts:
-        attacker01:
-          ansible_host: 192.168.189.138
+      hosts: null
     teamserver:
       hosts: null
     redirector:
@@ -13,15 +11,25 @@ windows:
   hosts: null
   children:
     dc:
-      hosts: null
+      hosts:
+        dc01:
+          ansible_host: 10.10.10.1
     exchange:
       hosts: null
     iis:
-      hosts: null
+      hosts:
+        iis01:
+          ansible_host: 10.10.10.2
+        iis02:
+          ansible_host: 10.10.10.3
     cert:
-      hosts: null
+      hosts:
+        cert01:
+          ansible_host: 10.10.10.4
     fileserver:
-      hosts: null
+      hosts:
+        fileserver01:
+          ansible_host: 10.10.10.5
     workstation:
       hosts: null
   vars:
@@ -33,7 +41,6 @@ windows:
     ansible_winrm_server_cert_validation: ignore
     ansible_winrm_operation_timeout_sec: 120
     ansible_winrm_read_timeout_sec: 130
-    windows_gateway: 10.10.10.1
+    windows_gateway: 10.10.10.10
     windows_mask: 255.255.0.0
     ansible_become_password: Passw0rd!
-    callbacks_enabled: profile_tasks
