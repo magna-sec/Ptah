@@ -1,20 +1,20 @@
 ---
-- include_tasks: pre_checks.yml
+- ansible.builtin.include_tasks: pre_checks.yml
 
-- include_tasks: domain.yml
-  when: domain_joined == false
+- ansible.builtin.include_tasks: domain.yml
+  when: not domain_joined
 
-- include_tasks: computers.yml
-  when: computers_exist == false
+- ansible.builtin.include_tasks: computers.yml
+  when: not computers_exist
 
-- include_tasks: groups.yml
-  when: groups_exist == false
+- ansible.builtin.include_tasks: groups.yml
+  when: not groups_exist
 
-- include_tasks: users.yml
-  when: users_exist == false
+- ansible.builtin.include_tasks: users.yml
+  when: not users_exist
 
-- include_tasks: make_misconfigs.yml
-  when: misconfigs_exist == false
+- ansible.builtin.include_tasks: make_misconfigs.yml
+  when: not misconfigs_exist
 
-- include_tasks: "{{ Local_Misconfig_Path }}"
-  when: lmisconfigs_exist == false
+- ansible.builtin.include_tasks: "{{ Local_Misconfig_Path }}"
+  when: not lmisconfigs_exist

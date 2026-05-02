@@ -2,53 +2,32 @@
 ## Domain
 - name: Checking if domain joined
   set_fact:
-    domain_joined: "{{ Domain in ansible_windows_domain }}"
+    domain_joined: "{{ Domain in ansible_facts['windows_domain'] }}"
 
-
-
-
-### Certificates Created
-# Tried doing with Get-CATemplate but trying to compare 2 lists if a pain... will come back to this
-#- name: Setting cert_exists to false
-#  set_fact:
-#    cert_exists: false
-#
-#- name: Check if certificate template is present
-#  win_shell: |
-#    Get-CATemplate | select Name
-#  register: template_info
-#
-#- name: Checking if cert exists
-#  set_fact:
-#    cert_exists: true
-#  when: item in template_info.stdout_lines | join(",")
-#  loop: "{{ Certs | regex_replace('\\s') }}"
-#
 ### Local Cert
-- name: Check for certificate killswitch file 
-  block: 
-  - set_fact:
-      cert_exists: false
+- name: Check for certificate killswitch file
+  block:
+    - set_fact:
+        cert_exists: false
 
-  - win_stat:
-      path: C:\users\{{ ansible_user_id }}\Documents\cert.txt
-    register: file_info
-  
-  - set_fact:
-      cert_exists: true
-    when: "file_info.stat.exists == true"
+    - ansible.windows.win_stat:
+        path: C:\users\{{ ansible_facts['user_id'] }}\Documents\cert.txt
+      register: file_info
 
+    - set_fact:
+        cert_exists: true
+      when: file_info.stat.exists
 
 ### Local Misconfigs
-- name: Check for local misconfigs killswitch file 
-  block: 
-  - set_fact:
-      lmisconfigs_exist: false
+- name: Check for local misconfigs killswitch file
+  block:
+    - set_fact:
+        lmisconfigs_exist: false
 
-  - win_stat:
-      path: C:\users\{{ ansible_user_id }}\Documents\lmisconfigs.txt
-    register: file_info
-  
-  - set_fact:
-      lmisconfigs_exist: true
-    when: "file_info.stat.exists == true"
+    - ansible.windows.win_stat:
+        path: C:\users\{{ ansible_facts['user_id'] }}\Documents\lmisconfigs.txt
+      register: file_info
+
+    - set_fact:
+        lmisconfigs_exist: true
+      when: file_info.stat.exists

@@ -13,11 +13,11 @@ windows:
     dc:
       hosts:
         dc01:
-          ansible_host: 10.10.45.1
+          ansible_host: 192.168.189.130
+        dc02:
+          ansible_host: 192.168.189.131
     exchange:
-      hosts:
-        exchange01:
-          ansible_host: 10.10.45.2
+      hosts: null
     iis:
       hosts: null
     cert:
@@ -35,7 +35,6 @@ windows:
     ansible_winrm_server_cert_validation: ignore
     ansible_winrm_operation_timeout_sec: 120
     ansible_winrm_read_timeout_sec: 130
-    windows_gateway: 10.10.10.1
-    windows_mask: 255.255.0.0
+    windows_gateway: 192.168.189.2
+    windows_mask: 255.255.255.0
     ansible_become_password: Passw0rd!
-    callbacks_enabled: profile_tasks

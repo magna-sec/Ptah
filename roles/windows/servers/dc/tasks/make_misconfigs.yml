@@ -1,29 +1,25 @@
 ---
-# Give every user 1x misconfig
-- include_tasks: "misconfigs/{{ User_Misconfigs | random }}"
+- ansible.builtin.include_tasks: "misconfigs/{{ User_Misconfigs | random }}"
   vars:
     selection: "{{ item }}"
   loop: "{{ Usernames }}"
 
-# Add every user to a random group
-- include_tasks: "misconfigs/join_group.yml"
+- ansible.builtin.include_tasks: "misconfigs/join_group.yml"
   vars:
     selection: "{{ item }}"
   loop: "{{ Usernames }}"
 
-# Give every group 1x misconfig
-- include_tasks: "misconfigs/{{ Group_Misconfigs | random }}"
+- ansible.builtin.include_tasks: "misconfigs/{{ Group_Misconfigs | random }}"
   vars:
     selection: "{{ item }}"
   loop: "{{ Groups }}"
 
-# Give every computer 1x misconfig
-- include_tasks: "misconfigs/{{ Computer_Misconfigs | random }}"
+- ansible.builtin.include_tasks: "misconfigs/{{ Computer_Misconfigs | random }}"
   vars:
     selection: "{{ item }}$"
   loop: "{{ Computers }}"
 
 - name: Create killswitch file for misconfigs
   ansible.windows.win_file:
-    path: C:\users\{{ ansible_user_id }}\Documents\misconfigs.txt
+    path: C:\users\{{ ansible_facts['user_id'] }}\Documents\misconfigs.txt
     state: touch

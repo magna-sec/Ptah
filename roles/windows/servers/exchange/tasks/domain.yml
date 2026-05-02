@@ -1,32 +1,30 @@
 ---
-# https://docs.ansible.com/ansible/latest/collections/ansible/windows/win_feature_module.html
-# Change hostname
 - name: Change the hostname {{ inventory_hostname }}
   ansible.windows.win_hostname:
     name: "{{ inventory_hostname }}"
 
-# Set DNS
-- name: Set internal DNS server 
+- name: Set internal DNS server
   ansible.windows.win_dns_client:
     adapter_names: '*'
     ipv4_addresses:
-    - "{{ groups['dc'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+      - "{{ groups['dc'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
 
-# Set static IP
 - name: Powershell - Set static IP address
   ansible.windows.win_powershell:
     script: |
       netsh interface ip set address Ethernet0 static {{ ansible_host }} {{ windows_mask }} {{ windows_gateway }}
-  async: 100 # Using "fire and forget"
+  async: 100
   poll: 0
+  vars:
+    ansible_win_async_startup_timeout: 60
 
 - name: Wait for hosts network
-  local_action:
-    module: wait_for
+  ansible.builtin.wait_for:
     host: "{{ ansible_host }}"
     port: 5986
     delay: 10
     state: started
+  delegate_to: localhost
   register: wait_result
 
 - name: Reboot for hostname change

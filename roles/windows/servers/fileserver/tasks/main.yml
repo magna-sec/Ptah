@@ -1,11 +1,11 @@
 ---
-- include_tasks: pre_checks.yml
+- ansible.builtin.include_tasks: pre_checks.yml
 
-- include_tasks: domain.yml
-  when: domain_joined == false
-  
-- include_tasks: shares.yml
-  when: shares_exist == false
+- ansible.builtin.include_tasks: domain.yml
+  when: not domain_joined
 
-- include_tasks: "{{ Local_Misconfig_Path }}"
-  when: lmisconfigs_exist == false
+- ansible.builtin.include_tasks: shares.yml
+  when: not shares_exist
+
+- ansible.builtin.include_tasks: "{{ Local_Misconfig_Path }}"
+  when: not lmisconfigs_exist

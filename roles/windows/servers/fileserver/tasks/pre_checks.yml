@@ -2,23 +2,20 @@
 ## Domain
 - name: Checking if domain joined
   set_fact:
-    domain_joined: "{{ Domain in ansible_windows_domain }}"
-
+    domain_joined: "{{ Domain in ansible_facts['windows_domain'] }}"
 
 ### Shares
 - name: Set shares_exist to false
   set_fact:
     shares_exist: false
 
-### Public Share
 - name: Set public_exist to false
   set_fact:
     public_exist: false
 
 - name: Powershell - Checking for shares
   ansible.windows.win_powershell:
-    script: |
-          net share
+    script: net share
   register: public_share
 
 - name: Parsing shares
@@ -27,15 +24,13 @@
   when: "'PublicVault' in item"
   loop: '{{ public_share.output }}'
 
-### Private Shares
 - name: Set secret_exist to false
   set_fact:
     secret_exist: false
 
 - name: Powershell - Checking for shares
   ansible.windows.win_powershell:
-    script: |
-          net share
+    script: net share
   register: secret_share
 
 - name: Parsing shares
@@ -47,20 +42,20 @@
 - name: Do shares exist?
   set_fact:
     shares_exist: true
-  when: 
-    - "public_exist == true"
-    - "secret_exist == true"
+  when:
+    - public_exist
+    - secret_exist
 
 ### Local Misconfigs
-- name: Check for local misconfigs killswitch file 
-  block: 
-  - set_fact:
-      lmisconfigs_exist: false
+- name: Check for local misconfigs killswitch file
+  block:
+    - set_fact:
+        lmisconfigs_exist: false
 
-  - win_stat:
-      path: C:\users\{{ ansible_user_id }}\Documents\lmisconfigs.txt
-    register: file_info
-  
-  - set_fact:
-      lmisconfigs_exist: true
-    when: "file_info.stat.exists == true"
+    - ansible.windows.win_stat:
+        path: C:\users\{{ ansible_facts['user_id'] }}\Documents\lmisconfigs.txt
+      register: file_info
+
+    - set_fact:
+        lmisconfigs_exist: true
+      when: file_info.stat.exists

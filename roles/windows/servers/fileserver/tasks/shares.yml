@@ -14,7 +14,7 @@
     name: PublicVault
     description: Store for shared files here
     path: C:\PublicVault
-    list: yes
+    list: true
     full: Administrators
     read: "Authenticated Users"
 
@@ -23,7 +23,7 @@
     name: SecretVault
     description: Top secret docs!
     path: C:\SecretVault
-    list: no
+    list: false
     full: Administrators
     read: Administrators
 
@@ -41,7 +41,7 @@
           $ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)
           $Acl.AddAccessRule($ACE)
           Set-Acl -Path "$dir" -AclObject $Acl
-  become: yes
+  become: true
   become_user: '{{ NetBIOS }}\administrator'
   become_method: runas  
 
@@ -58,6 +58,6 @@
           $ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)
           $Acl.AddAccessRule($ACE)
           Set-Acl -Path "$dir" -AclObject $Acl
-  become: yes
+  become: true
   become_user: '{{ NetBIOS }}\administrator'
   become_method: runas  

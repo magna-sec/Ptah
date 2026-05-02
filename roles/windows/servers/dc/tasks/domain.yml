@@ -1,54 +1,53 @@
 ---
 # https://madlabber.wordpress.com/2019/09/08/creating-a-new-active-directory-forest-with-ansible/
 
-# Change hostname
 - name: Change the hostname {{ inventory_hostname }}
   ansible.windows.win_hostname:
     name: "{{ inventory_hostname }}"
 
-# Set static IP
 - name: Powershell - Set static IP address
   ansible.windows.win_powershell:
     script: |
       netsh interface ip set address Ethernet0 static {{ ansible_host }} {{ windows_mask }} {{ windows_gateway }}
       netsh interface ipv4 set dns name="Ethernet" static 127.0.0.1 8.8.8.8
-  async: 100 # Using "fire and forget"
+  async: 100
   poll: 0
+  vars:
+    ansible_win_async_startup_timeout: 60
 
 - name: Wait for hosts network
-  local_action:
-    module: wait_for
+  ansible.builtin.wait_for:
     host: "{{ ansible_host }}"
     port: 5986
     delay: 10
     state: started
+  delegate_to: localhost
   register: wait_result
 
-
 - name: Reboot for hostname change
-  win_reboot:
-   reboot_timeout: 3600
+  ansible.windows.win_reboot:
+    reboot_timeout: 3600
 
 - name: Install Active Directory
   ansible.windows.win_feature:
-       name: AD-Domain-Services
-       include_management_tools: yes
-       include_sub_features: yes
-       state: present
+    name: AD-Domain-Services
+    include_management_tools: true
+    include_sub_features: true
+    state: present
 
 - name: Create "{{ Domain }}" Domain
-  ansible.windows.win_domain:
-     dns_domain_name: "{{ Domain }}"
-     safe_mode_password: Passw0rd!
+  microsoft.ad.domain:
+    dns_domain_name: "{{ Domain }}"
+    safe_mode_password: Passw0rd!
 
 - name: New Domain creation reboot
-  win_reboot:
-   reboot_timeout: 3600
+  ansible.windows.win_reboot:
+    reboot_timeout: 3600
 
 - name: Ensure a server is a domain controller
-  ansible.windows.win_domain_controller:
+  microsoft.ad.domain_controller:
     dns_domain_name: "{{ Domain }}"
-    domain_admin_user: administrator@"{{ Domain }}"
+    domain_admin_user: administrator@{{ Domain }}
     domain_admin_password: Passw0rd!
     safe_mode_password: Passw0rd!
     state: domain_controller

@@ -1,9 +1,10 @@
-- include_tasks: pre_checks.yml
+---
+- ansible.builtin.include_tasks: pre_checks.yml
 
-- include_tasks: domain.yml
-  when: domain_joined == false
+- ansible.builtin.include_tasks: domain.yml
+  when: not domain_joined
 
-- include_tasks: pre_reqs.yml
+- ansible.builtin.include_tasks: pre_reqs.yml
 
-- include_tasks: exchange_ad.yml
-- include_tasks: exchange.yml
+- ansible.builtin.include_tasks: exchange_ad.yml
+- ansible.builtin.include_tasks: exchange.yml

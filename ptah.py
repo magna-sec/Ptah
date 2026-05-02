@@ -136,7 +136,6 @@ def get_exchange():
             print(colored("Download Complete :)", 'blue'))
         if(ans == "2"):
             print(colored("Come back when you've got the ISO buddy!", 'red'))
-            quit()
 
 
 def get_ips(amount):
