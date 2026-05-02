@@ -1,23 +1,85 @@
 ---
-- ansible.builtin.include_tasks: "misconfigs/{{ User_Misconfigs | random }}"
-  vars:
-    selection: "{{ item }}"
+# Pre-compute all assignments in Jinja2 (zero WinRM calls)
+- name: Pre-assign user misconfigs
+  set_fact:
+    user_assignments: >-
+      {{ user_assignments | default([]) + [{
+        'target':        item,
+        'rand_user':     Usernames | random,
+        'rand_group':    Groups | random,
+        'rand_computer': Computers | random,
+        'misconfig':     User_Misconfigs | random
+      }] }}
   loop: "{{ Usernames }}"
+
+- name: Pre-assign group misconfigs
+  set_fact:
+    group_assignments: >-
+      {{ group_assignments | default([]) + [{
+        'target':        item,
+        'rand_user':     Usernames | random,
+        'rand_group':    Groups | random,
+        'rand_computer': Computers | random,
+        'misconfig':     Group_Misconfigs | random
+      }] }}
+  loop: "{{ Groups }}"
+
+- name: Pre-assign computer misconfigs
+  set_fact:
+    computer_assignments: >-
+      {{ computer_assignments | default([]) + [{
+        'target':        item + '$',
+        'rand_user':     Usernames | random,
+        'rand_group':    Groups | random,
+        'rand_computer': Computers | random,
+        'misconfig':     Computer_Misconfigs | random
+      }] }}
+  loop: "{{ Computers }}"
+
+# Group each list by misconfig file so each file runs once with its full batch
+- name: Group user assignments by misconfig
+  set_fact:
+    user_misconfig_groups: >-
+      {{ user_misconfig_groups | default({}) | combine({
+        item.misconfig: (user_misconfig_groups | default({}))[item.misconfig] | default([]) + [item]
+      }) }}
+  loop: "{{ user_assignments }}"
+
+- name: Group group assignments by misconfig
+  set_fact:
+    group_misconfig_groups: >-
+      {{ group_misconfig_groups | default({}) | combine({
+        item.misconfig: (group_misconfig_groups | default({}))[item.misconfig] | default([]) + [item]
+      }) }}
+  loop: "{{ group_assignments }}"
+
+- name: Group computer assignments by misconfig
+  set_fact:
+    computer_misconfig_groups: >-
+      {{ computer_misconfig_groups | default({}) | combine({
+        item.misconfig: (computer_misconfig_groups | default({}))[item.misconfig] | default([]) + [item]
+      }) }}
+  loop: "{{ computer_assignments }}"
+
+# One include per unique misconfig type — not per object
+- ansible.builtin.include_tasks: "misconfigs/{{ item.key }}"
+  vars:
+    assignments: "{{ item.value }}"
+  loop: "{{ user_misconfig_groups | dict2items }}"
 
 - ansible.builtin.include_tasks: "misconfigs/join_group.yml"
   vars:
-    selection: "{{ item }}"
-  loop: "{{ Usernames }}"
+    assignments: "{{ user_assignments }}"
 
-- ansible.builtin.include_tasks: "misconfigs/{{ Group_Misconfigs | random }}"
+- ansible.builtin.include_tasks: "misconfigs/{{ item.key }}"
   vars:
-    selection: "{{ item }}"
-  loop: "{{ Groups }}"
+    assignments: "{{ item.value }}"
+  loop: "{{ group_misconfig_groups | dict2items }}"
 
-- ansible.builtin.include_tasks: "misconfigs/{{ Computer_Misconfigs | random }}"
+- ansible.builtin.include_tasks: "misconfigs/{{ item.key }}"
   vars:
-    selection: "{{ item }}$"
-  loop: "{{ Computers }}"
+    assignments: "{{ item.value }}"
+  loop: "{{ computer_misconfig_groups | dict2items }}"
 
 - name: Create killswitch file for misconfigs
   ansible.windows.win_file:

@@ -1,11 +1,10 @@
 ---
 # https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync
-
-# Tested working: Server 2016
-- name: Powershell - Give {{ selection }} DcSync Rights
+- name: Give DcSync rights
   ansible.windows.win_powershell:
     script: |
-      dsacls.exe {{ DN }} /I:T /G "{{ NetBIOS }}\{{ selection }}:CA;Replicating Directory Changes"
-      dsacls.exe {{ DN }} /I:T /G "{{ NetBIOS }}\{{ selection }}:CA;Replicating Directory Changes All"
-
-# Cheers Taavi!
+      $targets = '{{ assignments | map(attribute="target") | list | to_json }}' | ConvertFrom-Json
+      foreach ($t in $targets) {
+        dsacls.exe {{ DN }} /I:T /G "{{ NetBIOS }}\${t}:CA;Replicating Directory Changes"
+        dsacls.exe {{ DN }} /I:T /G "{{ NetBIOS }}\${t}:CA;Replicating Directory Changes All"
+      }

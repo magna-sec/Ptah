@@ -1,13 +1,12 @@
 ---
-# https://docs.ansible.com/ansible/latest/collections/community/windows/win_group_membership_module.html
-
-- name: Pick random username
+- name: Collect local admin users
   set_fact:
-    selection: "{{ Usernames | random }}"
+    _local_admins: "{{ assignments | map(attribute='rand_user') | unique | list }}"
 
-- name: Put {{ selection }} into local administrators on {{ inventory_hostname }}
-  ansible.windows.win_group_membership:
-    name: administrators
-    members:
-      - '{{ NetBIOS }}\{{ selection }}'
-    state: present
+- name: Add random domain users to local admins
+  ansible.windows.win_powershell:
+    script: |
+      $users = '{{ _local_admins | to_json }}' | ConvertFrom-Json
+      foreach ($user in $users) {
+        Add-LocalGroupMember -Group Administrators -Member "{{ NetBIOS }}\$user" -ErrorAction SilentlyContinue
+      }

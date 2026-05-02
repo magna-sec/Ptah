@@ -1,6 +1,8 @@
 ---
-# Set SPN
-- name: Powershell - SetSPN CIFS/workstation01.{{ Domain }} for {{ selection }}
+- name: Set SPNs for Kerberoasting
   ansible.windows.win_powershell:
     script: |
-      setspn -s {{ selection }}svc/workstation01.{{ Domain }} {{ selection }}
+      $targets = '{{ assignments | map(attribute="target") | list | to_json }}' | ConvertFrom-Json
+      foreach ($t in $targets) {
+        setspn -s "${t}svc/workstation01.{{ Domain }}" $t
+      }

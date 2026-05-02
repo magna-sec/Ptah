@@ -1,10 +1,8 @@
 ---
-# https://github.com/PhilKeeble/AWS-RedTeam-ADLab/blob/main/dsc/adlab.ps1
-
-- name: Powershell - Give {{ selection }} DoesNotRequirePreAuth 
+- name: Set DoesNotRequirePreAuth
   ansible.windows.win_powershell:
     script: |
-      Set-ADAccountControl -Identity "{{ selection }}" -DoesNotRequirePreAuth $true
-
-
-
+      $targets = '{{ assignments | map(attribute="target") | list | to_json }}' | ConvertFrom-Json
+      foreach ($t in $targets) {
+        Set-ADAccountControl -Identity $t -DoesNotRequirePreAuth $true
+      }

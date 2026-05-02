@@ -1,8 +1,11 @@
 ---
-# https://docs.ansible.com/ansible/latest/collections/community/windows/win_domain_user_module.html
 - name: Create domain users
-  community.windows.win_domain_user:
-    name: "{{ item }}"
-    password: Passw0rd!
-    state: present
-  loop: "{{ Usernames }}"
+  ansible.windows.win_powershell:
+    script: |
+      $password = ConvertTo-SecureString "Passw0rd!" -AsPlainText -Force
+      $users = '{{ Usernames | to_json }}' | ConvertFrom-Json
+      foreach ($user in $users) {
+        New-ADUser -Name $user -SamAccountName $user `
+          -AccountPassword $password -Enabled $true `
+          -ErrorAction SilentlyContinue
+      }

@@ -5,7 +5,8 @@
   ansible.windows.win_hostname:
     name: "{{ inventory_hostname }}"
 
-- name: Powershell - Set static IP address
+# Primary DC: DNS to self. Secondary DCs: DNS to primary DC so they can resolve the domain.
+- name: Powershell - Set static IP address (primary DC)
   ansible.windows.win_powershell:
     script: |
       netsh interface ip set address Ethernet0 static {{ ansible_host }} {{ windows_mask }} {{ windows_gateway }}
@@ -14,6 +15,18 @@
   poll: 0
   vars:
     ansible_win_async_startup_timeout: 60
+  when: inventory_hostname == groups['dc'][0]
+
+- name: Powershell - Set static IP address (secondary DC)
+  ansible.windows.win_powershell:
+    script: |
+      netsh interface ip set address Ethernet0 static {{ ansible_host }} {{ windows_mask }} {{ windows_gateway }}
+      netsh interface ipv4 set dns name="Ethernet" static {{ hostvars[groups['dc'][0]]['ansible_host'] }} 8.8.8.8
+  async: 100
+  poll: 0
+  vars:
+    ansible_win_async_startup_timeout: 60
+  when: inventory_hostname != groups['dc'][0]
 
 - name: Wait for hosts network
   ansible.builtin.wait_for:
@@ -35,19 +48,24 @@
     include_sub_features: true
     state: present
 
+# Only the primary DC creates the forest
 - name: Create "{{ Domain }}" Domain
   microsoft.ad.domain:
     dns_domain_name: "{{ Domain }}"
     safe_mode_password: Passw0rd!
+  when: inventory_hostname == groups['dc'][0]
 
 - name: New Domain creation reboot
   ansible.windows.win_reboot:
     reboot_timeout: 3600
+  when: inventory_hostname == groups['dc'][0]
 
-- name: Ensure a server is a domain controller
+# Secondary DCs join the existing domain as additional domain controllers
+- name: Promote {{ inventory_hostname }} as additional domain controller
   microsoft.ad.domain_controller:
     dns_domain_name: "{{ Domain }}"
     domain_admin_user: administrator@{{ Domain }}
     domain_admin_password: Passw0rd!
     safe_mode_password: Passw0rd!
     state: domain_controller
+  when: inventory_hostname != groups['dc'][0]
