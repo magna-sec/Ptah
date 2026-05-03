@@ -8,3 +8,8 @@
           New-ADComputer -Name $computer -ErrorAction SilentlyContinue
         }
       }
+
+- name: Create computers killswitch file
+  ansible.windows.win_file:
+    path: C:\users\{{ ansible_facts['user_id'] }}\Documents\computers.txt
+    state: touch

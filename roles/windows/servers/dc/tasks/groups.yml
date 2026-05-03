@@ -1,10 +1,14 @@
 ---
 - name: Ensure Groups OU is present & protected
-  microsoft.ad.ou:
-    name: Groups
-    path: "{{ DN }}"
-    state: present
-    protect_from_deletion: true
+  ansible.windows.win_powershell:
+    script: |
+      $dn = "{{ DN }}"
+      $ouDN = "OU=Groups,$dn"
+      try {
+        Get-ADOrganizationalUnit -Identity $ouDN -ErrorAction Stop | Out-Null
+      } catch {
+        New-ADOrganizationalUnit -Name "Groups" -Path $dn -ProtectedFromAccidentalDeletion $true
+      }
 
 - name: Add groups
   ansible.windows.win_powershell:
@@ -14,3 +18,8 @@
         New-ADGroup -Name $group -GroupScope Global -Path "{{ Group_OU }}" `
           -ErrorAction SilentlyContinue
       }
+
+- name: Create groups killswitch file
+  ansible.windows.win_file:
+    path: C:\users\{{ ansible_facts['user_id'] }}\Documents\groups.txt
+    state: touch

@@ -31,7 +31,7 @@ PTAH = [
  ,"               ██║        ██║   ██║  ██║██║  ██║"
  ,"               ╚═╝        ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝"]
 
-MAIN  = {"1": "Deploy", "2": "Assume Breach", "99": "Setup Help"}
+MAIN  = {"1": "Deploy", "2": "Assume Breach", "3": "View Lab"}
 TYPES = {"1": "EXE", "2": "PS1"}
 YESNO = {"1": "Yes", "2": "No"}
 
@@ -43,6 +43,7 @@ INVENTORY = "inventory.yml"
 AD_VARS   = "group_vars/windows/active_directory.yml"
 LINUX     = ["attacker", "teamserver", "redirector"]
 WINDOWS   = ["dc", "exchange", "iis", "cert", "fileserver", "workstation"]
+DOMAIN_SERVERS = ["exchange", "iis", "cert", "fileserver", "workstation"]
 
 EX2016 = "roles/windows/servers/exchange/files/exchangeserver2016.iso"
 
@@ -113,7 +114,8 @@ def validate_url(url):
 def validate_domain(domain):
     if DOMAIN_RE.match(domain):
         return True
-    print(colored("Not a valid domain! (e.g. corp.local)", "red"))
+    if domain:
+        print(colored("Not a valid domain! (e.g. corp.local)", "red"))
     return False
 
 
@@ -150,7 +152,6 @@ def update_domain(domain):
     content = re.sub(r'^Domain:.*$', f'Domain: {domain}', content, flags=re.MULTILINE)
     with open(AD_VARS, 'w') as f:
         f.write(content)
-    print(colored(f"Domain set to: {domain}", 'blue'))
 
 
 def get_exchange():
@@ -171,6 +172,32 @@ def get_exchange():
             print(colored("Come back when you've got the ISO buddy!", 'red'))
 
 
+def print_summary(domain):
+    active = [i for i in inventory if i[1] not in ("", "0")]
+    if not active:
+        print(colored("  No hosts configured.", 'red'))
+        return
+
+    print(colored(DIVIDE, 'cyan'))
+    print(colored("  DEPLOYMENT SUMMARY", 'white'))
+    print(colored(DIVIDE, 'cyan'))
+
+    for i in active:
+        ips = i[2].split("~") if i[2] else []
+        ip_str = ", ".join(ips)
+        label = colored(f"  {i[0]:<14}", 'white')
+        count = colored(f"x{i[1]:<4}", 'yellow')
+        print(f"{label} {count} {colored(ip_str, 'green')}")
+
+    if domain:
+        print()
+        print(colored(f"  Domain:   {domain}", 'cyan'))
+        print(colored(f"  Gateway:  {inven_vars['windows_gateway']}", 'cyan'))
+        print(colored(f"  Mask:     {inven_vars['windows_mask']}", 'cyan'))
+
+    print(colored(DIVIDE, 'cyan'))
+
+
 def clear_inventory():
     with open(INVENTORY, 'r') as f:
         output = yaml.safe_load(f)
@@ -182,17 +209,14 @@ def clear_inventory():
         yaml.safe_dump(output, f, sort_keys=False)
 
 
-def edit_inventory():
-    global inven_vars
-
-    windows_found = False
+def edit_inventory(windows_found):
     clear_inventory()
 
     with open(INVENTORY, 'r') as f:
         output = yaml.safe_load(f)
 
     for host in inventory:
-        if host[1] == "" or host[1] == "0":
+        if host[1] in ("", "0"):
             continue
 
         host_type = host[0]
@@ -203,47 +227,107 @@ def edit_inventory():
             output["linux"]["children"][host_type]["hosts"] = {}
         if host_type in WINDOWS:
             output["windows"]["children"][host_type]["hosts"] = {}
-            windows_found = True
 
         for a in range(amount):
-            hostname = host_type + "{:02d}".format(a + 1)
-            ip_entry = {'ansible_host': ips[a]}
+            hostname  = host_type + "{:02d}".format(a + 1)
+            ip_entry  = {'ansible_host': ips[a]}
             if host_type in LINUX:
                 output["linux"]["children"][host_type]["hosts"][hostname] = ip_entry
             if host_type in WINDOWS:
                 output["windows"]["children"][host_type]["hosts"][hostname] = ip_entry
 
     if windows_found:
-        print(colored("Windows Gateway IP: ", 'green'))
-        inven_vars["windows_gateway"] = get_ips(1)
-        print(colored("Windows Subnet Mask: ", 'green'))
-        inven_vars["windows_mask"] = get_ips(1)
         output["windows"]["vars"] = inven_vars
 
     try:
         with open(INVENTORY, 'w') as f:
             yaml.safe_dump(output, f, sort_keys=False)
         print(colored("Inventory Saved!", 'blue'))
-        print(colored("Please Run: ", 'blue'), end='')
-        print(colored("ansible-playbook -i inventory.yml deploy.yml", 'green'))
     except Exception as e:
         print(colored(f"Inventory failed to save: {e}", 'red'))
+        return
+
+    deploy_cmd = "ansible-playbook -i inventory.yml deploy.yml"
+    print(colored(f"Run: {deploy_cmd}", 'green'))
+    print(colored("Execute now?", 'green'))
+    if print_menu(YESNO) == "1":
+        print(colored("Deploying lab, please wait...", 'blue'))
+        subprocess.run(deploy_cmd.split())
 
 
 def deploy():
     for i in inventory:
         print(colored(f"Amount of {i[0]}'s: ", 'green'))
-        i[1] = get_input(string.digits)
+        i[1] = get_input(list(string.digits))
         i[2] = get_ips(i[1])
         if i[0] == "exchange":
             get_exchange()
 
     windows_selected = any(i[0] in WINDOWS and i[1] not in ("", "0") for i in inventory)
-    if windows_selected:
-        print(colored("Active Directory Domain (e.g. corp.local): ", 'green'))
-        update_domain(get_domain())
 
-    edit_inventory()
+    domain = None
+    if windows_selected:
+        dc_count = next((int(i[1]) for i in inventory if i[0] == "dc"), 0)
+        needs_dc = [i[0] for i in inventory if i[0] in DOMAIN_SERVERS and i[1] not in ("", "0")]
+        if dc_count == 0 and needs_dc:
+            print(colored(f"  WARNING: {', '.join(needs_dc)} configured but no DC — these hosts won't join a domain!", 'red'))
+
+        print(colored("Active Directory Domain (e.g. corp.local): ", 'green'))
+        domain = get_domain()
+
+        print(colored("Windows Gateway IP: ", 'green'))
+        inven_vars["windows_gateway"] = get_ips(1)
+        print(colored("Windows Subnet Mask: ", 'green'))
+        inven_vars["windows_mask"] = get_ips(1)
+
+    print_summary(domain)
+    print(colored("Proceed with deployment?", 'green'))
+    if print_menu(YESNO) != "1":
+        print(colored("Aborted.", 'red'))
+        return
+
+    if domain:
+        update_domain(domain)
+    edit_inventory(windows_selected)
+
+
+def view_inventory():
+    with open(INVENTORY, 'r') as f:
+        inven = yaml.safe_load(f)
+
+    print(colored(DIVIDE, 'cyan'))
+    print(colored("  CURRENT LAB", 'white'))
+    print(colored(DIVIDE, 'cyan'))
+
+    found_any = False
+
+    for group, hosts_key, colour in [("linux", LINUX, 'green'), ("windows", WINDOWS, 'cyan')]:
+        for host in hosts_key:
+            hosts = (inven.get(group, {})
+                         .get("children", {})
+                         .get(host, {})
+                         .get("hosts")) or {}
+            for hostname, data in hosts.items():
+                ip = data.get('ansible_host', '') if isinstance(data, dict) else ''
+                print(colored(f"  {hostname:<16} {ip}", colour))
+                found_any = True
+
+    if not found_any:
+        print(colored("  No hosts configured.", 'red'))
+    else:
+        try:
+            with open(AD_VARS, 'r') as f:
+                ad = yaml.safe_load(f)
+            print()
+            print(colored(f"  Domain:  {ad.get('Domain', '')}", 'yellow'))
+            win_vars = inven.get("windows", {}).get("vars", {})
+            if win_vars:
+                print(colored(f"  Gateway: {win_vars.get('windows_gateway', '')}", 'yellow'))
+                print(colored(f"  Mask:    {win_vars.get('windows_mask', '')}", 'yellow'))
+        except Exception:
+            pass
+
+    print(colored(DIVIDE, 'cyan'))
 
 
 def breach():
@@ -292,3 +376,4 @@ if __name__ == "__main__":
     choice = print_menu(MAIN)
     if choice == "1": deploy()
     if choice == "2": breach()
+    if choice == "3": view_inventory()

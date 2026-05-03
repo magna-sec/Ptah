@@ -13,6 +13,12 @@
     - redirector
 
 ######## WINDOWS
+- hosts: dc:exchange:iis:cert:fileserver:workstation
+  tasks:
+    - name: Disable Windows Firewall (all profiles)
+      ansible.windows.win_powershell:
+        script: Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
+
 - hosts: dc
   serial: 1
   roles:
@@ -37,3 +43,8 @@
 - hosts: workstation
   roles:
     - windows/workstation
+
+######## COMMON
+- hosts: dc:exchange:iis:cert:fileserver
+  roles:
+    - windows/servers/common

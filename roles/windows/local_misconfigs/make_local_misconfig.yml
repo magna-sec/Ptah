@@ -1,9 +1,18 @@
 ---
+# Build a small assignments list so misconfigs that need rand_user (e.g. local_admin.yml) have it.
+# Files that don't use assignments (service_manager, unquoted_service) simply ignore it.
+- name: Build local misconfig assignments
+  set_fact:
+    local_assignments: "{{ local_assignments | default([]) + [{'rand_user': Usernames | random}] }}"
+  loop: "{{ range(3) | list }}"
+
 - name: Pick random local misconfig
   set_fact:
     misconfig: "{{ Local_Misconfigs | random }}"
 
 - ansible.builtin.include_tasks: "{{ misconfig }}"
+  vars:
+    assignments: "{{ local_assignments }}"
 
 - name: Create killswitch file for local misconfigs
   ansible.windows.win_file:

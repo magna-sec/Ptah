@@ -4,17 +4,19 @@
 - ansible.builtin.include_tasks: domain.yml
   when: not domain_joined
 
+# AD objects replicate automatically — only the primary DC needs to create them
 - ansible.builtin.include_tasks: computers.yml
-  when: not computers_exist
+  when: not computers_exist and inventory_hostname == groups['dc'][0]
 
 - ansible.builtin.include_tasks: groups.yml
-  when: not groups_exist
+  when: not groups_exist and inventory_hostname == groups['dc'][0]
 
 - ansible.builtin.include_tasks: users.yml
-  when: not users_exist
+  when: not users_exist and inventory_hostname == groups['dc'][0]
 
 - ansible.builtin.include_tasks: make_misconfigs.yml
-  when: not misconfigs_exist
+  when: not misconfigs_exist and inventory_hostname == groups['dc'][0]
 
+# Local misconfigs configure the machine itself, so every DC runs them
 - ansible.builtin.include_tasks: "{{ Local_Misconfig_Path }}"
   when: not lmisconfigs_exist

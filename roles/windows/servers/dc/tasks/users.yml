@@ -9,3 +9,8 @@
           -AccountPassword $password -Enabled $true `
           -ErrorAction SilentlyContinue
       }
+
+- name: Create users killswitch file
+  ansible.windows.win_file:
+    path: C:\users\{{ ansible_facts['user_id'] }}\Documents\users.txt
+    state: touch

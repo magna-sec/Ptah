@@ -5,37 +5,55 @@
   ansible.windows.win_hostname:
     name: "{{ inventory_hostname }}"
 
-# Primary DC: DNS to self. Secondary DCs: DNS to primary DC so they can resolve the domain.
-- name: Powershell - Set static IP address (primary DC)
+# IP change is async because changing the IP drops the WinRM connection.
+# DNS is set in a separate synchronous task after wait_for confirms the new IP is up,
+# so any failure is visible rather than silently skipped.
+- name: Set static IP (primary DC)
   ansible.windows.win_powershell:
     script: |
-      netsh interface ip set address Ethernet0 static {{ ansible_host }} {{ windows_mask }} {{ windows_gateway }}
-      netsh interface ipv4 set dns name="Ethernet" static 127.0.0.1 8.8.8.8
+      $if = (Get-NetAdapter | Where-Object { $_.Status -eq 'Up' -and $_.Name -like 'Ethernet*' } | Select-Object -First 1).Name
+      netsh interface ip set address "$if" static {{ ansible_host }} {{ windows_mask }} {{ windows_gateway }}
   async: 100
   poll: 0
   vars:
     ansible_win_async_startup_timeout: 60
   when: inventory_hostname == groups['dc'][0]
 
-- name: Powershell - Set static IP address (secondary DC)
+- name: Set static IP (secondary DC)
   ansible.windows.win_powershell:
     script: |
-      netsh interface ip set address Ethernet0 static {{ ansible_host }} {{ windows_mask }} {{ windows_gateway }}
-      netsh interface ipv4 set dns name="Ethernet" static {{ hostvars[groups['dc'][0]]['ansible_host'] }} 8.8.8.8
+      $if = (Get-NetAdapter | Where-Object { $_.Status -eq 'Up' -and $_.Name -like 'Ethernet*' } | Select-Object -First 1).Name
+      netsh interface ip set address "$if" static {{ ansible_host }} {{ windows_mask }} {{ windows_gateway }}
   async: 100
   poll: 0
   vars:
     ansible_win_async_startup_timeout: 60
   when: inventory_hostname != groups['dc'][0]
 
-- name: Wait for hosts network
+- name: Wait for host to respond at new IP
   ansible.builtin.wait_for:
     host: "{{ ansible_host }}"
     port: 5986
     delay: 10
+    timeout: 120
     state: started
   delegate_to: localhost
-  register: wait_result
+
+- name: Set DNS (primary DC - loopback)
+  ansible.windows.win_powershell:
+    script: |
+      $if = (Get-NetAdapter | Where-Object { $_.Status -eq 'Up' -and $_.Name -like 'Ethernet*' } | Select-Object -First 1).Name
+      netsh interface ipv4 set dns name="$if" static 127.0.0.1 primary validate=no
+      netsh interface ipv4 add dns name="$if" 8.8.8.8 index=2 validate=no
+  when: inventory_hostname == groups['dc'][0]
+
+- name: Set DNS (secondary DC - point to primary)
+  ansible.windows.win_powershell:
+    script: |
+      $if = (Get-NetAdapter | Where-Object { $_.Status -eq 'Up' -and $_.Name -like 'Ethernet*' } | Select-Object -First 1).Name
+      netsh interface ipv4 set dns name="$if" static {{ hostvars[groups['dc'][0]]['ansible_host'] }} primary validate=no
+      netsh interface ipv4 add dns name="$if" 8.8.8.8 index=2 validate=no
+  when: inventory_hostname != groups['dc'][0]
 
 - name: Reboot for hostname change
   ansible.windows.win_reboot:
@@ -48,7 +66,6 @@
     include_sub_features: true
     state: present
 
-# Only the primary DC creates the forest
 - name: Create "{{ Domain }}" Domain
   microsoft.ad.domain:
     dns_domain_name: "{{ Domain }}"
@@ -60,7 +77,16 @@
     reboot_timeout: 3600
   when: inventory_hostname == groups['dc'][0]
 
-# Secondary DCs join the existing domain as additional domain controllers
+- name: Wait for primary DC LDAP before promoting
+  ansible.builtin.wait_for:
+    host: "{{ hostvars[groups['dc'][0]]['ansible_host'] }}"
+    port: 389
+    delay: 15
+    timeout: 600
+    state: started
+  delegate_to: localhost
+  when: inventory_hostname != groups['dc'][0]
+
 - name: Promote {{ inventory_hostname }} as additional domain controller
   microsoft.ad.domain_controller:
     dns_domain_name: "{{ Domain }}"
@@ -68,4 +94,14 @@
     domain_admin_password: Passw0rd!
     safe_mode_password: Passw0rd!
     state: domain_controller
+  when: inventory_hostname != groups['dc'][0]
+
+- name: Wait for WinRM to be available after promotion reboot
+  ansible.builtin.wait_for:
+    host: "{{ ansible_host }}"
+    port: 5986
+    delay: 30
+    timeout: 600
+    state: started
+  delegate_to: localhost
   when: inventory_hostname != groups['dc'][0]

@@ -1,0 +1,10 @@
+---
+- name: Ensure C:\Scripts exists
+  ansible.windows.win_file:
+    path: C:\Scripts
+    state: directory
+
+- name: Copy Set-SigningConfig.ps1 to C:\Scripts
+  ansible.windows.win_copy:
+    src: "{{ playbook_dir }}/utils/Set-SigningConfig.ps1"
+    dest: C:\Scripts\Set-SigningConfig.ps1

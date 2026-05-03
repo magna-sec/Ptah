@@ -1,64 +1,50 @@
 ---
 ## Domain
-- name: Checking if domain joined
+- name: Check if domain joined
   set_fact:
     domain_joined: "{{ Domain in ansible_facts['windows_domain'] }}"
 
 ### Computers
-- name: Check if computer account exists in Active Directory
+- name: Check for computers killswitch file
   block:
     - set_fact:
         computers_exist: false
-    - set_fact:
-        last_comp: '{{ Computers | last }}'
 
-    - name: Check computers exist
-      ansible.windows.win_shell: |
-        Get-ADComputer -Filter { Name -eq "{{ last_comp }}" } | Select-Object -ExpandProperty Name
-      register: computer_account_result
-      ignore_errors: true
+    - ansible.windows.win_stat:
+        path: C:\users\{{ ansible_facts['user_id'] }}\Documents\computers.txt
+      register: computers_file
 
     - set_fact:
         computers_exist: true
-      when:
-        - last_comp in computer_account_result.stdout
-        - domain_joined
+      when: computers_file.stat.exists
 
 ### Groups
-- name: Check if groups exists in Active Directory
+- name: Check for groups killswitch file
   block:
     - set_fact:
         groups_exist: false
-    - set_fact:
-        last_group: '{{ Groups | last }}'
 
-    - name: Check groups exist
-      ansible.windows.win_shell: |
-        Get-ADGroup -Filter { Name -eq "{{ last_group }}" } | Select-Object -ExpandProperty Name
-      register: group_result
-      ignore_errors: true
+    - ansible.windows.win_stat:
+        path: C:\users\{{ ansible_facts['user_id'] }}\Documents\groups.txt
+      register: groups_file
 
     - set_fact:
         groups_exist: true
-      when:
-        - last_group in group_result.stdout
-        - domain_joined
+      when: groups_file.stat.exists
 
 ### Users
-- name: Ensuring users are present
+- name: Check for users killswitch file
   block:
     - set_fact:
         users_exist: false
-    - ansible.windows.win_user:
-        name: '{{ Usernames | last }}'
-        state: query
-      register: user
 
-- name: Set users_exist if users found
-  set_fact:
-    users_exist: true
-  when: "'path' in item.key"
-  loop: "{{ lookup('ansible.builtin.dict', user) }}"
+    - ansible.windows.win_stat:
+        path: C:\users\{{ ansible_facts['user_id'] }}\Documents\users.txt
+      register: users_file
+
+    - set_fact:
+        users_exist: true
+      when: users_file.stat.exists
 
 ### AD Misconfigs
 - name: Check for AD misconfigs killswitch file
@@ -68,11 +54,11 @@
 
     - ansible.windows.win_stat:
         path: C:\users\{{ ansible_facts['user_id'] }}\Documents\misconfigs.txt
-      register: file_info
+      register: misconfigs_file
 
     - set_fact:
         misconfigs_exist: true
-      when: file_info.stat.exists
+      when: misconfigs_file.stat.exists
 
 ### Local Misconfigs
 - name: Check for local misconfigs killswitch file
@@ -82,8 +68,8 @@
 
     - ansible.windows.win_stat:
         path: C:\users\{{ ansible_facts['user_id'] }}\Documents\lmisconfigs.txt
-      register: file_info
+      register: lmisconfigs_file
 
     - set_fact:
         lmisconfigs_exist: true
-      when: file_info.stat.exists
+      when: lmisconfigs_file.stat.exists

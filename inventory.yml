@@ -13,9 +13,9 @@ windows:
     dc:
       hosts:
         dc01:
-          ansible_host: 192.168.189.130
+          ansible_host: 192.168.189.132
         dc02:
-          ansible_host: 192.168.189.131
+          ansible_host: 192.168.189.133
     exchange:
       hosts: null
     iis:
@@ -23,7 +23,9 @@ windows:
     cert:
       hosts: null
     fileserver:
-      hosts: null
+      hosts:
+        fileserver01:
+          ansible_host: 192.168.189.134
     workstation:
       hosts: null
   vars:

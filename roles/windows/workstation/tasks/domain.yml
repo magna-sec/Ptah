@@ -6,13 +6,13 @@
 - name: Set internal DNS server
   ansible.windows.win_dns_client:
     adapter_names: '*'
-    ipv4_addresses:
-      - "{{ groups['dc'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
+    ipv4_addresses: "{{ groups['dc'] | map('extract', hostvars, ['ansible_host']) | list }}"
 
 - name: Powershell - Set static IP address
   ansible.windows.win_powershell:
     script: |
-      netsh interface ip set address Ethernet0 static {{ ansible_host }} {{ windows_mask }} {{ windows_gateway }}
+      $if = (Get-NetAdapter | Where-Object { $_.Status -eq 'Up' -and $_.Name -like 'Ethernet*' } | Select-Object -First 1).Name
+      netsh interface ip set address "$if" static {{ ansible_host }} {{ windows_mask }} {{ windows_gateway }}
   async: 100
   poll: 0
   vars:
@@ -38,7 +38,7 @@
       Reg add HKLM\System\CurrentControlSet\Control\Lsa /v NetJoinLegacyAccountReuse /t REG_DWORD /d 1 /f
 
 - name: Joining {{ inventory_hostname }} to {{ Domain }}
-  ansible.windows.win_domain_membership:
+  microsoft.ad.membership:
     dns_domain_name: "{{ Domain }}"
     domain_admin_user: administrator@{{ Domain }}
     domain_admin_password: Passw0rd!
